@@ -889,8 +889,57 @@ void Sudoku::openTriples()
 											this->cand[i][a].erase(this->cand[i][a].begin() + b);
 										if (this->cand[i][a][b] == this->cand[i][j][2])
 											this->cand[i][a].erase(this->cand[i][a].begin() + b);
+									}							
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (int j = 0;j < 9;j++)
+	{
+		for (int i = 0;i < 9;i++)
+		{
+			if (this->cand[i][j].size() == 3)
+			{
+				for (int k = 0;k < this->cand[i][j].size();k++)
+				{
+					// liczba wyst¹pieñ kandydata
+					std::vector<int>boxes;
+					for (int a = 0;a < 9;a++)
+					{
+						if (this->cand[a][j].size() == 2 && this->contains(this->cand[a][j], this->cand[i][j][k]))
+						{
+							boxes.push_back(a);
+						}
+					}
+					if (boxes.size() == 2)
+					{
+						int exist = 0; //liczba wysi¹pieñ kandydata
+						int number; // liczba która nie wystêpuje w polu o rozmiarze 2 
+						for (int a = 0;a < this->cand[i][j].size();a++)
+						{
+							if (this->contains(this->cand[boxes[0]][j], this->cand[i][j][a]))
+							{
+								exist++;
+							}
+							else
+								number = this->cand[i][j][a];
+						}
+						if (exist == 2 && this->contains(this->cand[boxes[1]][j], number))
+						{
+							for (int a = 0;a < 9;a++)
+								if (a != j && a != boxes[0] && a != boxes[1])
+									for (int b = 0;b < this->cand[i][a].size();b++)
+									{
+										if (this->cand[a][j][b] == this->cand[i][j][0])
+											this->cand[a][j].erase(this->cand[a][j].begin() + b);
+										if (this->cand[a][j][b] == this->cand[i][j][1])
+											this->cand[a][j].erase(this->cand[a][j].begin() + b);
+										if (this->cand[a][j][b] == this->cand[i][j][2])
+											this->cand[a][j].erase(this->cand[a][j].begin() + b);
 									}
-							
 						}
 					}
 				}
@@ -902,19 +951,141 @@ void Sudoku::openTriples()
 
 void Sudoku::hiddenPairs()
 {
-	for (int i = 0;i < 9;i++) //iteracja po wierszach
+	for (int i = 0;i < 9;i++)
 	{
-		for (int j = 0;j < 9;j++)
+		for (int a = 1;a <= 9;a++) //iteracja po wszystkich mo¿liwych kandydatach
 		{
-			if (this->cand[i][j].size()>=2)
-			{
-				for (int k = 0;k < cand[i][j].size();k++)
-				{
-					for (int a = 0;a < 9;a++)
-					{
-						if (a != j && this->contains(this->cand[i][a], this->cand[i][j][k]))
-						{
+			int exist1 = 0;
+			for (int j = 0;j < 9;j++)
+				if (this->contains(this->cand[i][j], a))
+					exist1++;
 
+			if (exist1 == 2) //je¿eli kandydat wystêpuje tylko 2 razy w wierszu
+			{
+				for (int b = 1;b <= 9;b++) // iteracja po kandydatach ró¿nych od pierwszego (a)
+				{
+					int exist2 = 0;
+					if(b != a)
+						for (int c = 0;c < 9;c++)
+							if (this->contains(this->cand[i][c], b))
+								exist2++;
+
+					if (exist2 == 2) //je¿eli kandydat wystêpuje tylko 2 razy w wierszu
+					{
+						//sprawdzenie czy ci kandydaci wystêpuj¹ w 2 tych samych polach
+						std::vector<int> sameBoxes; //koordynata bloku w którym wystêpuj¹ kandydaci
+						for (int c = 0;c < 9;c++)
+							if (this->contains(this->cand[i][c], a) && this->contains(this->cand[i][c], b))
+								sameBoxes.push_back(c);
+
+						if (sameBoxes.size() == 2) //jêzeli wystêpuj¹ w tych samych polach - usuniêcie pozosta³ych kandydatów z tych 2 pól
+						{
+							if (this->cand[i][sameBoxes[0]].size() > 2)
+								for (int c = 0;c < this->cand[i][sameBoxes[0]].size();c++)
+									if (a != this->cand[i][sameBoxes[0]][c] && b != this->cand[i][sameBoxes[0]][c])
+										this->cand[i][sameBoxes[0]].erase(this->cand[i][sameBoxes[0]].begin() + c);
+
+							if (this->cand[i][sameBoxes[1]].size() > 2)
+								for (int c = 0;c < this->cand[i][sameBoxes[1]].size();c++)
+									if (a != this->cand[i][sameBoxes[1]][c] && b != this->cand[i][sameBoxes[1]][c])
+										this->cand[i][sameBoxes[1]].erase(this->cand[i][sameBoxes[1]].begin() + c);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (int j = 0;j < 9;j++)
+	{
+		for (int a = 1;a <= 9;a++)
+		{
+			int exist1 = 0;
+			for (int i = 0;i < 9;i++)
+				if (this->contains(this->cand[i][j], a))
+					exist1++;
+
+			if (exist1 == 2)
+			{
+				for (int b = 1;b <= 9;b++)
+				{
+					int exist2 = 0;
+					if (b != a)
+						for (int c = 0;c < 9;c++)
+							if (this->contains(this->cand[c][j], b))
+								exist2++;
+
+					if (exist2 == 2)
+					{
+						std::vector<int> sameBoxes;
+						for (int c = 0;c < 9;c++)
+							if (this->contains(this->cand[c][j], a) && this->contains(this->cand[c][j], b))
+								sameBoxes.push_back(c);
+
+						if (sameBoxes.size() == 2)
+						{
+							if (this->cand[sameBoxes[0]][j].size() > 2)
+								for (int c = 0;c < this->cand[sameBoxes[0]][j].size();c++)
+									if (a != this->cand[sameBoxes[0]][j][c] && b != this->cand[sameBoxes[0]][j][c])
+										this->cand[sameBoxes[0]][j].erase(this->cand[sameBoxes[0]][j].begin() + c);
+
+							if (this->cand[sameBoxes[1]][j].size() > 2)
+								for (int c = 0;c < this->cand[sameBoxes[1]][j].size();c++)
+									if (a != this->cand[sameBoxes[1]][j][c] && b != this->cand[sameBoxes[1]][j][c])
+										this->cand[sameBoxes[1]][j].erase(this->cand[sameBoxes[1]][j].begin() + c);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (int y = 0;y <= 6;y += 3)
+	{
+		for (int x = 0;x <= 6;x += 3)
+		{
+			for (int a = 1;a <= 9;a++)
+			{
+				int exist1 = 0;
+				for (int i = y;i < y + 3;i++)
+					for (int j = x;j < x + 3;j++)
+						if (this->contains(this->cand[i][j], a))
+							exist1++;
+
+				if (exist1 == 2)
+				{
+					for (int b = 1;b <= 9;b++)
+					{
+						int exist2 = 0;
+						if (b != a)
+							for (int i = y;i < y + 3;i++)
+								for (int j = x;j < x + 3;j++)
+									if (this->contains(this->cand[i][j], b))
+										exist2++;
+
+						if (exist2 == 2)
+						{
+							std::vector<int> sameBoxesY,sameBoxesX;
+							for (int i = y;i < y + 3;i++)
+								for (int j = x;j < x + 3;j++)
+									if (this->contains(this->cand[i][j], a) && this->contains(this->cand[i][j], b))
+									{
+										sameBoxesY.push_back(i);
+										sameBoxesX.push_back(j);
+									}
+
+							if (sameBoxesX.size() == 2)
+							{
+								if (this->cand[sameBoxesY[0]][sameBoxesX[0]].size() > 2)
+									for (int c = 0;c < this->cand[sameBoxesY[0]][sameBoxesX[0]].size();c++)
+										if (a != this->cand[sameBoxesY[0]][sameBoxesX[0]][c] && b != this->cand[sameBoxesY[0]][sameBoxesX[0]][c])
+											this->cand[sameBoxesY[0]][sameBoxesX[0]].erase(this->cand[sameBoxesY[0]][sameBoxesX[0]].begin() + c);
+
+								if (this->cand[sameBoxesY[1]][sameBoxesX[1]].size() > 2)
+									for (int c = 0;c < this->cand[sameBoxesY[1]][sameBoxesX[1]].size();c++)
+										if (a != this->cand[sameBoxesY[1]][sameBoxesX[1]][c] && b != this->cand[sameBoxesY[1]][sameBoxesX[1]][c])
+											this->cand[sameBoxesY[1]][sameBoxesX[1]].erase(this->cand[sameBoxesY[1]][sameBoxesX[1]].begin() + c);
+							}
 						}
 					}
 				}
@@ -1042,11 +1213,11 @@ void Sudoku::solve()
 
 	if (!this->solved)
 	{
-		for (int i = 0;i < 3;i++)
+		for (int i = 0;i < 5;i++)
 		{
 			this->lockedCandidate();
 			this->openPairs();
-			this->openTriples();
+			this->hiddenPairs();
 			this->xWing();
 			this->singleCandidate();
 			if (!this->solved)
