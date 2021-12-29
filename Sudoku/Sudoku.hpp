@@ -37,6 +37,8 @@ private:
 	int checkedX = -1, checkedY = -1;
 	bool solved = false;
 	bool error = false;
+	int repeat = 0;
+	std::vector<int> usedBoxY, usedBoxX;
 
 	//Private functions
 	void initWindow();

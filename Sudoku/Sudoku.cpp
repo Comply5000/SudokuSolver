@@ -851,49 +851,41 @@ void Sudoku::openTriples()
 	{
 		for (int j = 0;j < 9;j++)
 		{
-			if (this->cand[i][j].size() == 3)
+			if (this->cand[i][j].size() == 3) //pola o wiekoœci 3
 			{
-				for (int k = 0;k < this->cand[i][j].size();k++)
-				{ 
-					// liczba wyst¹pieñ kandydata
-					std::vector<int>boxes;
-					for (int a = 0;a < 9;a++)
+				std::vector<int> line;
+				for (int a = 0;a < 9;a++)
+				{
+					if (this->cand[i][a] == this->cand[i][j]) //je¿eli pole jest takie samo
 					{
-						if (this->cand[i][a].size() == 2 && this->contains(this->cand[i][a],this->cand[i][j][k]))
-						{
-							boxes.push_back(a);
-						}
+						line.push_back(a);
 					}
-					if (boxes.size() == 2)
+					if (this->cand[i][a].size() == 2) // je¿eli pole jes wielkoœci 2
 					{
-						int exist = 0; //liczba wysi¹pieñ kandydata
-						int number; // liczba która nie wystêpuje w polu o rozmiarze 2 
-						for (int a = 0;a < this->cand[i][j].size();a++)
-						{
-							if (this->contains(this->cand[i][boxes[0]], this->cand[i][j][a]))
-							{
+						int exist = 0;
+						for (int b = 0;b < this->cand[i][a].size();b++)
+							if (this->contains(this->cand[i][j], this->cand[i][a][b]))
 								exist++;
-							}
-							else
-								number = this->cand[i][j][a];
-						}
-						if (exist == 2 && this->contains(this->cand[i][boxes[1]],number))
-						{													
-							for (int a = 0;a < 9;a++)
-								if (a != j && a != boxes[0] && a != boxes[1])
-									for (int b = 0;b < this->cand[i][a].size();b++)
-									{
-										if (this->cand[i][a][b] == this->cand[i][j][0])
-											this->cand[i][a].erase(this->cand[i][a].begin() + b);
-										if (this->cand[i][a][b] == this->cand[i][j][1])
-											this->cand[i][a].erase(this->cand[i][a].begin() + b);
-										if (this->cand[i][a][b] == this->cand[i][j][2])
-											this->cand[i][a].erase(this->cand[i][a].begin() + b);
-									}							
-						}
+						if (exist == 2) // to pole zawiera 2 takich samych kandydatów jak pole pierwotne
+							line.push_back(a);
 					}
 				}
-			}
+				if (line.size() == 3) // je¿eli istniej¹ 3 takie pola
+				{
+					for (int a = 0;a < 9;a++)
+						if (a != line[0] && a != line[1] && a != line[2])
+							for (int b = 0;b < this->cand[i][a].size();b++)
+							{
+								if (this->cand[i][a][b] == this->cand[i][j][0])
+									this->cand[i][a].erase(this->cand[i][a].begin() + b);
+								if (this->cand[i][a][b] == this->cand[i][j][1])
+									this->cand[i][a].erase(this->cand[i][a].begin() + b);
+								if (this->cand[i][a][b] == this->cand[i][j][2])
+									this->cand[i][a].erase(this->cand[i][a].begin() + b);
+							}
+
+				}
+			}						
 		}
 	}
 
@@ -903,49 +895,94 @@ void Sudoku::openTriples()
 		{
 			if (this->cand[i][j].size() == 3)
 			{
-				for (int k = 0;k < this->cand[i][j].size();k++)
+				std::vector<int> line;
+				for (int a = 0;a < 9;a++)
 				{
-					// liczba wyst¹pieñ kandydata
-					std::vector<int>boxes;
-					for (int a = 0;a < 9;a++)
+					if (this->cand[a][j] == this->cand[i][j])
 					{
-						if (this->cand[a][j].size() == 2 && this->contains(this->cand[a][j], this->cand[i][j][k]))
-						{
-							boxes.push_back(a);
-						}
+						line.push_back(a);
 					}
-					if (boxes.size() == 2)
+					if (this->cand[a][j].size() == 2)
 					{
-						int exist = 0; //liczba wysi¹pieñ kandydata
-						int number; // liczba która nie wystêpuje w polu o rozmiarze 2 
-						for (int a = 0;a < this->cand[i][j].size();a++)
-						{
-							if (this->contains(this->cand[boxes[0]][j], this->cand[i][j][a]))
-							{
+						int exist = 0;
+						for (int b = 0;b < this->cand[a][j].size();b++)
+							if (this->contains(this->cand[i][j], this->cand[a][j][b]))
 								exist++;
-							}
-							else
-								number = this->cand[i][j][a];
-						}
-						if (exist == 2 && this->contains(this->cand[boxes[1]][j], number))
+						if (exist == 2)
+							line.push_back(a);
+					}
+				}
+				if (line.size() == 3)
+				{
+					for (int a = 0;a < 9;a++)
+						if (a != line[0] && a != line[1] && a != line[2])
+							for (int b = 0;b < this->cand[a][j].size();b++)
+							{
+								if (this->cand[a][j][b] == this->cand[i][j][0])
+									this->cand[a][j].erase(this->cand[a][j].begin() + b);
+								if (this->cand[a][j][b] == this->cand[i][j][1])
+									this->cand[a][j].erase(this->cand[a][j].begin() + b);
+								if (this->cand[a][j][b] == this->cand[i][j][2])
+									this->cand[a][j].erase(this->cand[a][j].begin() + b);
+							}						
+				}
+			}
+		}
+	}
+
+	for (int y = 0;y <= 6;y += 3) // x,y - pêtle odpowiedzialne za przemieszczanie siê pobiêdzy 9 boxami 
+	{
+		for (int x = 0;x <= 6;x += 3)
+		{
+			for (int i = y;i < y + 3;i++) // iterazja poszczególnych pól w boxie
+			{
+				for (int j = x;j < x + 3;j++)
+				{
+					if (this->cand[i][j].size() == 3)
+					{
+						std::vector<std::vector<int>>box;
+						for (int a = y;a < y + 3;a++)
 						{
-							for (int a = 0;a < 9;a++)
-								if (a != j && a != boxes[0] && a != boxes[1])
-									for (int b = 0;b < this->cand[i][a].size();b++)
+							for(int b = x;b < x + 3;b++)
+							{
+								if (this->cand[a][b] == this->cand[i][j])
+								{
+									box.push_back(this->cand[a][b]);
+								}
+								if (this->cand[a][b].size() == 2)
+								{
+									int exist = 0;
+									for (int c = 0;c < this->cand[a][b].size();c++)
+										if (this->contains(this->cand[i][j], this->cand[a][b][c]))
+											exist++;
+									if (exist == 2)
 									{
-										if (this->cand[a][j][b] == this->cand[i][j][0])
-											this->cand[a][j].erase(this->cand[a][j].begin() + b);
-										if (this->cand[a][j][b] == this->cand[i][j][1])
-											this->cand[a][j].erase(this->cand[a][j].begin() + b);
-										if (this->cand[a][j][b] == this->cand[i][j][2])
-											this->cand[a][j].erase(this->cand[a][j].begin() + b);
+										box.push_back(this->cand[a][b]);
 									}
+								}
+							}
+						}
+						if (box.size() == 3)
+						{
+							for (int a = y;a < y + 3;a++)
+								for (int b = x;b < x + 3;b++)
+									if (this->cand[a][b] != box[0] && this->cand[a][b] != box[1] && this->cand[a][b] != box[2])
+										for (int c = 0;c < this->cand[a][b].size();c++)
+										{
+											if (this->cand[a][b][c] == this->cand[i][j][0])
+												this->cand[a][b].erase(this->cand[a][b].begin() + c);
+											if (this->cand[a][b][c] == this->cand[i][j][1])
+												this->cand[a][b].erase(this->cand[a][b].begin() + c);
+											if (this->cand[a][b][c] == this->cand[i][j][2])
+												this->cand[a][b].erase(this->cand[a][b].begin() + c);
+										}
 						}
 					}
 				}
 			}
 		}
 	}
+
 }
 
 
@@ -1094,7 +1131,6 @@ void Sudoku::hiddenPairs()
 	}
 }
 
-
 void Sudoku::xWing()
 {
 	//wiersze
@@ -1217,6 +1253,7 @@ void Sudoku::solve()
 		{
 			this->lockedCandidate();
 			this->openPairs();
+			this->openTriples();
 			this->hiddenPairs();
 			this->xWing();
 			this->singleCandidate();
