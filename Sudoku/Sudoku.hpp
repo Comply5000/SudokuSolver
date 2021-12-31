@@ -3,7 +3,10 @@
 #include<string>
 #include<iostream>
 #include<vector>
+#include<array>
 #include<algorithm>
+
+#include "Load.hpp"
 
 class Sudoku
 {
@@ -18,21 +21,25 @@ private:
 	sf::RectangleShape resetButton;
 	sf::RectangleShape stepButton;
 	sf::RectangleShape solveButton;
+	sf::RectangleShape saveButton;
+	sf::RectangleShape loadButton;
 	sf::RectangleShape box[9][9];
 
 	//Textures
 	sf::Texture boardTexture;
 	sf::Texture boxTextures[10];
 	sf::Color* greyColor;
-	sf::Texture resetTexture;
-	sf::Texture stepTexture;
-	sf::Texture solveTexture;
+	sf::Texture resetTexture[2];
+	sf::Texture stepTexture[2];
+	sf::Texture solveTexture[2];
+	sf::Texture saveTexture[2];
+	sf::Texture loadTexture[2];
 
 	//Mouse position
 	sf::Vector2f mousePosition;
 
 	//Logic
-	int number[9][9];
+	std::array<std::array<int, 9>, 9> number;
 	std::vector<std::vector<std::vector<int>>>cand;
 	int checkedX = -1, checkedY = -1;
 	bool solved = false;

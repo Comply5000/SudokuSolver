@@ -147,10 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Load.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Sudoku.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Load.hpp" />
     <ClInclude Include="Sudoku.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

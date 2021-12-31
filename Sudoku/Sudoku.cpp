@@ -16,20 +16,36 @@ void Sudoku::initBoard()
 	this->boardTexture.loadFromFile("Textures/board.png");
 	this->board.setTexture(&this->boardTexture);
 
-	this->resetButton.setPosition(750.f, 500.f);
+	this->resetButton.setPosition(750.f, 300.f);
 	this->resetButton.setSize(sf::Vector2f(200.f, 100.f));
-	this->resetTexture.loadFromFile("Textures/reset.png");
-	this->resetButton.setTexture(&this->resetTexture);
+	this->resetTexture[0].loadFromFile("Textures/reset.png");
+	this->resetButton.setTexture(&this->resetTexture[0]);
 
 	this->stepButton.setPosition(750.f, 100.f);
 	this->stepButton.setSize(sf::Vector2f(200.f, 100.f));
-	this->stepTexture.loadFromFile("Textures/onestep.png");
-	this->stepButton.setTexture(&this->stepTexture);
+	this->stepTexture[0].loadFromFile("Textures/onestep.png");
+	this->stepButton.setTexture(&this->stepTexture[0]);
 
-	this->solveButton.setPosition(750.f, 300.f);
+	this->solveButton.setPosition(750.f, 200.f);
 	this->solveButton.setSize(sf::Vector2f(200.f, 100.f));
-	this->solveTexture.loadFromFile("Textures/solve.png");
-	this->solveButton.setTexture(&this->solveTexture);
+	this->solveTexture[0].loadFromFile("Textures/solve.png");
+	this->solveButton.setTexture(&this->solveTexture[0]);
+
+	this->saveButton.setPosition(750.f, 400.f);
+	this->saveButton.setSize(sf::Vector2f(200.f, 100.f));
+	this->saveTexture[0].loadFromFile("Textures/save.png");
+	this->saveButton.setTexture(&this->saveTexture[0]);
+
+	this->loadButton.setPosition(750.f, 500.f);
+	this->loadButton.setSize(sf::Vector2f(200.f, 100.f));
+	this->loadTexture[0].loadFromFile("Textures/load.png");
+	this->loadButton.setTexture(&this->loadTexture[0]);
+
+	this->loadTexture[1].loadFromFile("Textures/load-hover.png");
+	this->saveTexture[1].loadFromFile("Textures/save-hover.png");
+	this->solveTexture[1].loadFromFile("Textures/solve-hover.png");
+	this->stepTexture[1].loadFromFile("Textures/onestep-hover.png");
+	this->resetTexture[1].loadFromFile("Textures/reset-hover.png");
 }
 
 void Sudoku::drawBoard()
@@ -38,6 +54,8 @@ void Sudoku::drawBoard()
 	this->window->draw(this->resetButton);
 	this->window->draw(this->solveButton);
 	this->window->draw(this->stepButton);
+	this->window->draw(this->loadButton);
+	this->window->draw(this->saveButton);
 }
 
 void Sudoku::initBoxes()
@@ -118,19 +136,29 @@ void Sudoku::updateMousePosition() //aktualizacja pozycji myszy wzglêcem okna
 void Sudoku::updateButtons() //zmiana koloru przycisków przy najechaniu kursorem na nie
 {
 	if (this->resetButton.getGlobalBounds().contains(this->mousePosition))
-		this->resetTexture.loadFromFile("Textures/reset-hover.png");
+		this->resetButton.setTexture(&this->resetTexture[1]);
 	else
-		this->resetTexture.loadFromFile("Textures/reset.png");
+		this->resetButton.setTexture(&this->resetTexture[0]);
 
 	if (this->solveButton.getGlobalBounds().contains(this->mousePosition))
-		this->solveTexture.loadFromFile("Textures/solve-hover.png");
+		this->solveButton.setTexture(&this->solveTexture[1]);
 	else
-		this->solveTexture.loadFromFile("Textures/solve.png");
+		this->solveButton.setTexture(&this->solveTexture[0]);
 
 	if (this->stepButton.getGlobalBounds().contains(this->mousePosition))
-		this->stepTexture.loadFromFile("Textures/onestep-hover.png");
+		this->stepButton.setTexture(&this->stepTexture[1]);
 	else
-		this->stepTexture.loadFromFile("Textures/onestep.png");
+		this->stepButton.setTexture(&this->stepTexture[0]);
+
+	if (this->loadButton.getGlobalBounds().contains(this->mousePosition))
+		this->loadButton.setTexture(&this->loadTexture[1]);
+	else
+		this->loadButton.setTexture(&this->loadTexture[0]);
+
+	if (this->saveButton.getGlobalBounds().contains(this->mousePosition))
+		this->saveButton.setTexture(&this->saveTexture[1]);
+	else
+		this->saveButton.setTexture(&this->saveTexture[0]);
 }
 
 void Sudoku::updateBoxes()
@@ -357,7 +385,7 @@ void Sudoku::menu()
 			}
 			std::cout << std::endl;
 		}
-		std::cout << std::endl;
+		std::cout << std::endl;	
 	}
 	else if (this->solveButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
 	{
@@ -388,9 +416,25 @@ void Sudoku::menu()
 			}
 		}
 	}
+	else if (this->loadButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	{
+		Load load;
+		load.readFile();
+		this->number = load.returnNumber();
+	}
+
 	if (this->ev.type == sf::Event::MouseButtonReleased)
 		if (this->ev.mouseButton.button == sf::Mouse::Left)
 			pressed = false;
+
+
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			this->box[i][j].setTexture(&boxTextures[this->number[i][j]]);
+		}
+	}
 }
 
 bool Sudoku::existInSquare(int y,int x,int k)

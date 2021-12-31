@@ -1,4 +1,5 @@
 #include "Sudoku.hpp"
+#include "Load.hpp"
 
 int main()
 {
@@ -8,6 +9,7 @@ int main()
         sudoku.update();
         sudoku.render();
     }
+
 
     return 0;
 }
