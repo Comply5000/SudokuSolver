@@ -150,11 +150,13 @@
     <ClCompile Include="Load.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Save.cpp" />
+    <ClCompile Include="Solver.cpp" />
     <ClCompile Include="Sudoku.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Load.hpp" />
     <ClInclude Include="Save.hpp" />
+    <ClInclude Include="Solver.hpp" />
     <ClInclude Include="Sudoku.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

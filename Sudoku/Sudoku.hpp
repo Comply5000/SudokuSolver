@@ -8,6 +8,7 @@
 
 #include "Load.hpp"
 #include "Save.hpp"
+#include "Solver.hpp"
 
 class Sudoku
 {
@@ -43,10 +44,6 @@ private:
 	std::array<std::array<int, 9>, 9> number;
 	std::vector<std::vector<std::vector<int>>>cand;
 	int checkedX = -1, checkedY = -1;
-	bool solved = false;
-	bool error = false;
-	int repeat = 0;
-	std::vector<int> usedBoxY, usedBoxX;
 
 	//Private functions
 	void initWindow();
@@ -66,20 +63,7 @@ public:
 	void updateButtons();
 	void updateBoxes();
 	void menu();
-
-	//Solving algorithms
-	bool existInSquare(int y,int x,int k);
-	bool contains(std::vector<int> vec, const int& elem);
-	void findCandidate();
-	void singleCandidate();
-	void hiddenLoner();
-	void lockedCandidate();
-	void openPairs();
-	void openTriples();
-	void hiddenPairs();
-	void xWing();
-
-	void solve();
+	void updateNumbers();
 
 	void update();
 	void render();

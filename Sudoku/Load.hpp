@@ -20,7 +20,5 @@ public:
 	bool openFileDialog(wchar_t szFileName[]);
 	void readFile();
 	std::array<std::array<int, 9>, 9> returnNumber();
-
-
 };
 
