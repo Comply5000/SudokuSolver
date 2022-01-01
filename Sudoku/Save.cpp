@@ -1,14 +1,15 @@
-#include "Load.hpp"
+#include "Save.hpp"
 
-Load::Load()
+Save::Save(std::array<std::array<int, 9>, 9> tab)
+{
+	this->number = tab;
+}
+
+Save::~Save()
 {
 }
 
-Load::~Load()
-{
-}
-
-bool Load::openFileDialog(wchar_t szFileName[])
+bool Save::saveFileDialog(wchar_t szFileName[])
 {
     OPENFILENAME ofn;
     const wchar_t* FilterSpec = L"Text Files(.txt)\0*.txt\0";
@@ -35,45 +36,25 @@ bool Load::openFileDialog(wchar_t szFileName[])
     ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
     // false if failed or cancelled
-    return GetOpenFileName(&ofn);
+    return GetSaveFileName(&ofn);
 }
 
-void Load::readFile()
+void Save::saveFile()
 {
-    for (int i = 0;i < 9;i++)
-        for (int j = 0;j < 9;j++)
-            this->number[i][j] = 0;
-
-    wchar_t openedFileName[MAX_PATH];
-    if (openFileDialog(openedFileName))
+    wchar_t savedFileName[MAX_PATH];
+    if (saveFileDialog(savedFileName))
     {
         std::fstream file;
-        file.open(openedFileName, std::ios::in);
+        file.open(savedFileName, std::ios::out);
 
-        std::string line;
-        std::vector<std::string> tab;
-        while (!file.eof())
+        for (int i = 0;i < 9;i++)
         {
-            std::getline(file, line);
-            tab.push_back(line);
+            for (int j = 0;j < 9;j++)
+            {
+                file << number[i][j];
+            }
+            file << std::endl;
         }
         file.close();
-
-        try
-        {
-            for (int i = 0;i < 9;i++)
-            {
-                for (int j = 0;j < tab[i].length();j++)
-                    this->number[i][j] = tab[i][j] - 48;
-            }
-        } 
-        catch(std::exception& e)
-        {
-        }
-    }    
-}
-
-std::array<std::array<int, 9>, 9> Load::returnNumber()
-{
-    return this->number;
+    }
 }

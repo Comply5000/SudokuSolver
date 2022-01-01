@@ -422,6 +422,11 @@ void Sudoku::menu()
 		load.readFile();
 		this->number = load.returnNumber();
 	}
+	else if (this->saveButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	{
+		Save save(this->number);
+		save.saveFile();
+	}
 
 	if (this->ev.type == sf::Event::MouseButtonReleased)
 		if (this->ev.mouseButton.button == sf::Mouse::Left)

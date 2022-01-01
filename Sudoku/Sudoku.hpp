@@ -7,6 +7,7 @@
 #include<algorithm>
 
 #include "Load.hpp"
+#include "Save.hpp"
 
 class Sudoku
 {
