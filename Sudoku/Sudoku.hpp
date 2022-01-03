@@ -26,6 +26,7 @@ private:
 	sf::RectangleShape saveButton;
 	sf::RectangleShape loadButton;
 	sf::RectangleShape box[9][9];
+	sf::RectangleShape qwer;
 
 	//Textures
 	sf::Texture boardTexture;
@@ -36,6 +37,7 @@ private:
 	sf::Texture solveTexture[2];
 	sf::Texture saveTexture[2];
 	sf::Texture loadTexture[2];
+	sf::Texture candTexture[10];
 
 	//Mouse position
 	sf::Vector2f mousePosition;
@@ -44,6 +46,10 @@ private:
 	std::array<std::array<int, 9>, 9> number;
 	std::vector<std::vector<std::vector<int>>>cand;
 	int checkedX = -1, checkedY = -1;
+	bool showCand = false;
+
+	//Display Candidates
+	std::vector<std::vector<std::vector<sf::RectangleShape>>>candBox;
 
 	//Private functions
 	void initWindow();
@@ -51,6 +57,7 @@ private:
 	void drawBoard();
 	void initBoxes();
 	void drawBoxes();
+	void initCand();
 
 public:
 	Sudoku();
@@ -64,6 +71,10 @@ public:
 	void updateBoxes();
 	void menu();
 	void updateNumbers();
+
+	void updateCand();
+	void updateCandColor();
+	void drawCand();
 
 	void update();
 	void render();

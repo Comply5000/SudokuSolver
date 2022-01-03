@@ -46,6 +46,10 @@ void Sudoku::initBoard()
 	this->solveTexture[1].loadFromFile("Textures/solve-hover.png");
 	this->stepTexture[1].loadFromFile("Textures/onestep-hover.png");
 	this->resetTexture[1].loadFromFile("Textures/reset-hover.png");
+
+	this->qwer.setPosition(750.f, 600.f);
+	this->qwer.setSize(sf::Vector2f(200.f, 100.f));
+	qwer.setFillColor(sf::Color::Red);
 }
 
 void Sudoku::drawBoard()
@@ -56,6 +60,7 @@ void Sudoku::drawBoard()
 	this->window->draw(this->stepButton);
 	this->window->draw(this->loadButton);
 	this->window->draw(this->saveButton);
+	this->window->draw(this->qwer);
 }
 
 void Sudoku::initBoxes()
@@ -93,12 +98,24 @@ void Sudoku::drawBoxes()
 			this->window->draw(box[i][j]);
 }
 
+void Sudoku::initCand()
+{
+	for (int i = 1;i < 10;i++)
+	{
+		std::string t = "Textures/CandText/" + std::to_string(i) + ".png";
+		this->candTexture[i].loadFromFile(t);
+	}
+}
+
+
+
 //Public functions
 Sudoku::Sudoku()
 {
 	this->initWindow();
 	this->initBoard();
 	this->initBoxes();
+	this->initCand();
 }
 
 Sudoku::~Sudoku()
@@ -377,21 +394,6 @@ void Sudoku::menu()
 		this->number = solver.returnNumber();
 		this->cand = solver.returnCand();
 		this->updateNumbers();
-
-		std::cout << "Kandydaci:"<<std::endl;
-		for (int i = 0;i < 9;i++)
-		{
-			for (int j = 0;j < 9;j++)
-			{
-				for (int k = 0;k < cand[i][j].size();k++)
-				{
-					std::cout << cand[i][j][k] << " ";
-				}
-				std::cout << std::endl;
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;	
 	}
 
 	else if (this->solveButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
@@ -444,6 +446,15 @@ void Sudoku::menu()
 		save.saveFile();
 	}
 
+	else if (this->qwer.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
+	{
+		pressed = true;
+		if (!showCand)
+			showCand = true;
+		else
+			showCand = false;
+	}
+
 	if (this->ev.type == sf::Event::MouseButtonReleased)
 		if (this->ev.mouseButton.button == sf::Mouse::Left)
 			pressed = false;
@@ -461,6 +472,77 @@ void Sudoku::updateNumbers()
 	}
 }
 
+void Sudoku::updateCand()
+{
+	Solver solver(this->number);
+	this->cand = solver.returnCand();
+
+	std::vector<std::vector<std::vector<sf::RectangleShape>>>candBox(9, std::vector<std::vector<sf::RectangleShape>>(9));
+
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			if (this->number[i][j] == 0)
+			{
+				float x = 0;
+				float y = 0;
+				for (int k = 0;k < this->cand[i][j].size();k++)
+				{
+					sf::RectangleShape a;
+					a.setPosition(this->box[i][j].getPosition().x + x, this->box[i][j].getPosition().y + y);
+					a.setSize(sf::Vector2f(17.5f, 17.5f));
+					a.setTexture(&this->candTexture[this->cand[i][j][k]]);
+					candBox[i][j].push_back(a);
+
+					if (x == 52.5)
+					{
+						x = 0;
+						y += 17.5;
+					}
+					else
+						x += 17.5;
+
+				}
+			}
+		}
+	}
+
+	this->candBox = candBox;
+}
+
+void Sudoku::updateCandColor()
+{
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			if (i == this->checkedY && j == this->checkedX)
+			{
+				for (int k = 0;k < this->candBox[i][j].size();k++)
+					this->candBox[i][j][k].setFillColor(*this->greyColor);
+			}
+			else
+				for (int k = 0;k < this->candBox[i][j].size();k++)
+					this->candBox[i][j][k].setFillColor(sf::Color::White);
+		}
+	}
+}
+
+void Sudoku::drawCand()
+{
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			for (int k = 0;k < this->candBox[i][j].size();k++)
+			{
+				this->window->draw(this->candBox[i][j][k]);
+			}
+		}
+	}
+}
+
 void Sudoku::update()
 {
 	this->running();
@@ -469,6 +551,8 @@ void Sudoku::update()
 	this->updateButtons();
 	this->updateBoxes();
 	this->menu();
+	this->updateCand();
+	this->updateCandColor();
 }
 
 void Sudoku::render()
@@ -476,5 +560,7 @@ void Sudoku::render()
 	this->window->clear();
 	this->drawBoard();
 	this->drawBoxes();
+	if(showCand)
+		this->drawCand();
 	this->window->display();
 }

@@ -888,6 +888,7 @@ std::array<std::array<int, 9>, 9> Solver::returnNumber()
 
 std::vector<std::vector<std::vector<int>>> Solver::returnCand()
 {
+	this->findCandidate();
 	return this->cand;
 }
 
