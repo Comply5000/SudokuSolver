@@ -47,9 +47,18 @@ void Sudoku::initBoard()
 	this->stepTexture[1].loadFromFile("Textures/onestep-hover.png");
 	this->resetTexture[1].loadFromFile("Textures/reset-hover.png");
 
-	this->qwer.setPosition(750.f, 600.f);
-	this->qwer.setSize(sf::Vector2f(200.f, 100.f));
-	qwer.setFillColor(sf::Color::Red);
+	this->checkBox.setPosition(750.f, 625.f);
+	this->checkBox.setSize(sf::Vector2f(50.f, 50.f));
+	this->checkBoxTexture[0].loadFromFile("Textures/check2.png");
+	this->checkBoxTexture[1].loadFromFile("Textures/check.png");
+	this->checkBox.setTexture(&this->checkBoxTexture[0]);
+
+	this->font.loadFromFile("Fonts/arial.ttf");
+	this->text.setFont(this->font);
+	this->text.setString("Candidates");
+	this->text.setPosition(sf::Vector2f(810.f, 626.f));
+	this->text.setCharacterSize(35);
+	this->text.setFillColor(sf::Color::White);
 }
 
 void Sudoku::drawBoard()
@@ -60,7 +69,8 @@ void Sudoku::drawBoard()
 	this->window->draw(this->stepButton);
 	this->window->draw(this->loadButton);
 	this->window->draw(this->saveButton);
-	this->window->draw(this->qwer);
+	this->window->draw(this->checkBox);
+	this->window->draw(this->text);
 }
 
 void Sudoku::initBoxes()
@@ -104,6 +114,8 @@ void Sudoku::initCand()
 	{
 		std::string t = "Textures/CandText/" + std::to_string(i) + ".png";
 		this->candTexture[i].loadFromFile(t);
+		t = "Textures/CheckedCand/" + std::to_string(i) + ".png";
+		this->checkedCandTexture[i].loadFromFile(t);
 	}
 }
 
@@ -188,25 +200,36 @@ void Sudoku::updateBoxes()
 		{
 			if (this->box[i][j].getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
 			{
-				pressed = true;
-				if (this->checkedX == j && this->checkedY == i)
+				bool candClick = false;
+				for (int k = 0;k < this->candBox[i][j].size();k++)
+					if (this->candBox[i][j][k].getGlobalBounds().contains(this->mousePosition))
+					{
+						candClick = true;
+						break;
+					}
+
+				if (!candClick || !showCand)
 				{
-					this->box[i][j].setFillColor(sf::Color::White);
-					checkedX = -1;
-					checkedY = -1;
-				}
-				else if(this->checkedX != -1 && this->checkedY != -1)
-				{
-					this->box[this->checkedY][this->checkedX].setFillColor(sf::Color::White);
-					this->box[i][j].setFillColor(*this->greyColor);
-					this->checkedX = j;
-					this->checkedY = i;
-				}
-				else
-				{
-					this->box[i][j].setFillColor(*this->greyColor);
-					this->checkedX = j;
-					this->checkedY = i;
+					pressed = true;
+					if (this->checkedX == j && this->checkedY == i)
+					{
+						this->box[i][j].setFillColor(sf::Color::White);
+						checkedX = -1;
+						checkedY = -1;
+					}
+					else if (this->checkedX != -1 && this->checkedY != -1)
+					{
+						this->box[this->checkedY][this->checkedX].setFillColor(sf::Color::White);
+						this->box[i][j].setFillColor(*this->greyColor);
+						this->checkedX = j;
+						this->checkedY = i;
+					}
+					else
+					{
+						this->box[i][j].setFillColor(*this->greyColor);
+						this->checkedX = j;
+						this->checkedY = i;
+					}
 				}
 			}
 		}
@@ -428,12 +451,19 @@ void Sudoku::menu()
 			{
 				this->box[i][j].setTexture(&this->boxTextures[0]);
 				this->number[i][j] = 0;
+				for (int k = 1;k < 10;k++)
+					this->checkedCand[i][j][k] = false;
 			}
 		}
 	}
 
 	else if (this->loadButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
+		for (int i = 0;i < 9;i++)
+			for (int j = 0;j < 9;j++)
+				for (int k = 1;k < 10;k++)
+					this->checkedCand[i][j][k] = false;
+
 		Load load;
 		load.readFile();
 		this->number = load.returnNumber();
@@ -446,13 +476,19 @@ void Sudoku::menu()
 		save.saveFile();
 	}
 
-	else if (this->qwer.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
+	else if (this->checkBox.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
 	{
 		pressed = true;
 		if (!showCand)
+		{
 			showCand = true;
+			checkBox.setTexture(&this->checkBoxTexture[1]);
+		}
 		else
+		{
 			showCand = false;
+			checkBox.setTexture(&this->checkBoxTexture[0]);
+		}
 	}
 
 	if (this->ev.type == sf::Event::MouseButtonReleased)
@@ -507,8 +543,29 @@ void Sudoku::updateCand()
 			}
 		}
 	}
-
 	this->candBox = candBox;
+
+	static bool pressed = false;
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			for (int k = 0;k < this->candBox[i][j].size();k++)
+			{
+				if (this->candBox[i][j][k].getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
+				{
+					pressed = true;
+					if(this->checkedCand[i][j][this->cand[i][j][k]] == true)
+						this->checkedCand[i][j][this->cand[i][j][k]] = false;
+					else
+						this->checkedCand[i][j][this->cand[i][j][k]] = true;
+				}			
+			}
+		}
+	}
+	if (this->ev.type == sf::Event::MouseButtonReleased)
+		if (this->ev.mouseButton.button == sf::Mouse::Left)
+			pressed = false;
 }
 
 void Sudoku::updateCandColor()
@@ -517,14 +574,18 @@ void Sudoku::updateCandColor()
 	{
 		for (int j = 0;j < 9;j++)
 		{
-			if (i == this->checkedY && j == this->checkedX)
+			for (int k = 0;k < this->candBox[i][j].size();k++)
 			{
-				for (int k = 0;k < this->candBox[i][j].size();k++)
+				if (this->checkedCand[i][j][this->cand[i][j][k]] == true)
+					this->candBox[i][j][k].setTexture(&this->checkedCandTexture[this->cand[i][j][k]]);
+				else
+					this->candBox[i][j][k].setTexture(&this->candTexture[this->cand[i][j][k]]);
+
+				if (i == this->checkedY && j == this->checkedX)
 					this->candBox[i][j][k].setFillColor(*this->greyColor);
-			}
-			else
-				for (int k = 0;k < this->candBox[i][j].size();k++)
+				else
 					this->candBox[i][j][k].setFillColor(sf::Color::White);
+			}
 		}
 	}
 }

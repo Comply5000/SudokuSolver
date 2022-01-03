@@ -26,7 +26,7 @@ private:
 	sf::RectangleShape saveButton;
 	sf::RectangleShape loadButton;
 	sf::RectangleShape box[9][9];
-	sf::RectangleShape qwer;
+	sf::RectangleShape checkBox;
 
 	//Textures
 	sf::Texture boardTexture;
@@ -38,6 +38,12 @@ private:
 	sf::Texture saveTexture[2];
 	sf::Texture loadTexture[2];
 	sf::Texture candTexture[10];
+	sf::Texture checkedCandTexture[10];
+	sf::Texture checkBoxTexture[2];
+
+	//Text
+	sf::Font font;
+	sf::Text text;
 
 	//Mouse position
 	sf::Vector2f mousePosition;
@@ -50,6 +56,9 @@ private:
 
 	//Display Candidates
 	std::vector<std::vector<std::vector<sf::RectangleShape>>>candBox;
+
+	//Checked CandBox
+	bool checkedCand[9][9][10];
 
 	//Private functions
 	void initWindow();
