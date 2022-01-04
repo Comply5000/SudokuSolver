@@ -10,10 +10,9 @@ class Solver
 {
 private:
 	std::array<std::array<int, 9>, 9> number;
-	std::array<std::array<int, 9>, 9> tab;
+	std::vector<std::array<std::array<int, 9>, 9>> tab;
 	std::vector<std::vector<std::vector<int>>>cand;
 	bool solved = false;
-	bool error = false;
 
 public:
 	Solver(std::array<std::array<int, 9>, 9> tab);

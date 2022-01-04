@@ -869,32 +869,35 @@ bool Solver::possible(int y, int x,int n)
 
 void Solver::solve()
 {
-	for (int i = 0;i < 9;i++)
+	if (tab.size() < 1)
 	{
-		for (int j = 0;j < 9;j++)
+		for (int i = 0;i < 9;i++)
 		{
-			if (this->number[i][j] == 0)
+			for (int j = 0;j < 9;j++)
 			{
-				for (int n = 1;n < 10;n++)
+				if (this->number[i][j] == 0)
 				{
-					if (possible(i, j, n))
+					for (int n = 1;n < 10;n++)
 					{
-						this->number[i][j] = n;
-						solve();
-						this->number[i][j] = 0;
+						if (possible(i, j, n))
+						{
+							this->number[i][j] = n;
+							solve();
+							this->number[i][j] = 0;
+						}
 					}
+					return;
 				}
-				return;
 			}
 		}
+		this->tab.push_back(this->number);
 	}
-	this->tab = this->number;
 }
 
 std::array<std::array<int, 9>, 9> Solver::returnAllNumbers()
 {
 	this->solve();
-	return this->tab;
+	return this->tab[0];
 }
 
 std::array<std::array<int, 9>, 9> Solver::returnSingleNumber()
@@ -906,9 +909,9 @@ std::array<std::array<int, 9>, 9> Solver::returnSingleNumber()
 		{
 			for (int j = 0;j < 9;j++)
 			{
-				if (this->tab[i][j] != this->number[i][j])
+				if (this->tab[0][i][j] != this->number[i][j])
 				{
-					this->number[i][j] = this->tab[i][j];
+					this->number[i][j] = this->tab[0][i][j];
 					return this->number;
 				}
 			}
