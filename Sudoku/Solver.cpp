@@ -851,39 +851,72 @@ void Solver::xWing()
 	}
 }
 
-void Solver::solve()
+bool Solver::possible(int y, int x,int n)
 {
-	this->findCandidate();
+	for (int i = 0;i < 9;i++)
+		if (this->number[y][i] == n)
+			return false;
 
-	this->singleCandidate();
-	if (!this->solved)
-		this->hiddenLoner();
+	for (int i = 0;i < 9;i++)
+		if (this->number[i][x] == n)
+			return false;
 
-	if (!this->solved)
-	{
-		for (int i = 0;i < 5;i++)
-		{
-			this->lockedCandidate();
-			this->openPairs();
-			this->openTriples();
-			this->hiddenPairs();
-			this->xWing();
-			this->singleCandidate();
-			if (!this->solved)
-				this->hiddenLoner();
-			if (this->solved)
-				break;
-		}
-	}
+	if (this->existInSquare(y, x, n))
+		return false;
 
-	if (!this->solved)
-		this->error = true;
-	this->solved = false;
+	return true;
 }
 
-std::array<std::array<int, 9>, 9> Solver::returnNumber()
+void Solver::solve()
 {
-	return this->number;
+	for (int i = 0;i < 9;i++)
+	{
+		for (int j = 0;j < 9;j++)
+		{
+			if (this->number[i][j] == 0)
+			{
+				for (int n = 1;n < 10;n++)
+				{
+					if (possible(i, j, n))
+					{
+						this->number[i][j] = n;
+						solve();
+						this->number[i][j] = 0;
+					}
+				}
+				return;
+			}
+		}
+	}
+	this->tab = this->number;
+}
+
+std::array<std::array<int, 9>, 9> Solver::returnAllNumbers()
+{
+	this->solve();
+	return this->tab;
+}
+
+std::array<std::array<int, 9>, 9> Solver::returnSingleNumber()
+{
+	this->solve();
+	try
+	{
+		for (int i = 0;i < 9;i++)
+		{
+			for (int j = 0;j < 9;j++)
+			{
+				if (this->tab[i][j] != this->number[i][j])
+				{
+					this->number[i][j] = this->tab[i][j];
+					return this->number;
+				}
+			}
+		}
+	}
+	catch (std::exception& e)
+	{
+	}
 }
 
 std::vector<std::vector<std::vector<int>>> Solver::returnCand()
@@ -892,7 +925,3 @@ std::vector<std::vector<std::vector<int>>> Solver::returnCand()
 	return this->cand;
 }
 
-bool Solver::returnError()
-{
-	return this->error;
-}

@@ -10,6 +10,7 @@ class Solver
 {
 private:
 	std::array<std::array<int, 9>, 9> number;
+	std::array<std::array<int, 9>, 9> tab;
 	std::vector<std::vector<std::vector<int>>>cand;
 	bool solved = false;
 	bool error = false;
@@ -30,9 +31,11 @@ public:
 	void hiddenPairs();
 	void xWing();
 
+	bool possible(int y,int x,int n);
 	void solve();
-	std::array<std::array<int, 9>, 9> returnNumber();
+
+	std::array<std::array<int, 9>, 9> returnAllNumbers();
+	std::array<std::array<int, 9>, 9> returnSingleNumber();
 	std::vector<std::vector<std::vector<int>>> returnCand();
-	bool returnError();
 };
 

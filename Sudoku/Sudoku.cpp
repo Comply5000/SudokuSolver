@@ -413,9 +413,7 @@ void Sudoku::menu()
 		pressed = true;
 
 		Solver solver(this->number);
-		solver.solve();
-		this->number = solver.returnNumber();
-		this->cand = solver.returnCand();
+		this->number = solver.returnSingleNumber();
 		this->updateNumbers();
 	}
 
@@ -424,22 +422,7 @@ void Sudoku::menu()
 		pressed = true;
 
 		Solver solver(this->number);
-		solver.solve();
-		this->number = solver.returnNumber();
-		this->updateNumbers();
-
-		while (true)
-		{
-			solver.solve();
-			int checked = 0;
-			for (int i = 0;i < 9;i++)
-				for (int j = 0;j < 9;j++)
-					if (number[i][j] != 0)
-							checked++;
-			if (checked == 81 || solver.returnError())
-				break;
-		}
-		this->number = solver.returnNumber();
+		this->number = solver.returnAllNumbers();
 		this->updateNumbers();
 	}
 
