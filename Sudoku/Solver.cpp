@@ -91,8 +91,9 @@ void Solver::findCandidate()
 	this->cand = tab;
 }
 
-void Solver::singleCandidate()
+void Solver::nakedSingle()
 {
+	this->findCandidate();
 	for (int i = 0;i < 9;i++)
 	{
 		for (int j = 0;j < 9;j++)
@@ -100,14 +101,17 @@ void Solver::singleCandidate()
 			if (this->cand[i][j].size() == 1 && this->cand[i][j][0] != 10)
 			{
 				this->number[i][j] = this->cand[i][j][0];
-				this->solved = true;
-				return;
+				std::vector<int> tab;
+				tab.push_back(i);
+				tab.push_back(j);
+				tab.push_back(this->cand[i][j][0]);
+				this->method.push_back(tab);
 			}
 		}
 	}
 }
 
-void Solver::hiddenLoner() //ukryty kandydat
+void Solver::hiddenSingle() //ukryty kandydat
 {
 	for (int i = 0;i < 9;i++) //iteracja po wierszach
 	{
@@ -358,7 +362,7 @@ void Solver::lockedCandidate()
 	}
 }
 
-void Solver::openPairs()
+void Solver::nakedPair()
 {
 	for (int i = 0;i < 9;i++) //iteracja po wierszu
 	{
@@ -458,7 +462,7 @@ void Solver::openPairs()
 	}
 }
 
-void Solver::openTriples()
+void Solver::nakedTriple()
 {
 	for (int i = 0;i < 9;i++)
 	{
@@ -598,7 +602,7 @@ void Solver::openTriples()
 
 }
 
-void Solver::hiddenPairs()
+void Solver::hiddenPair()
 {
 	for (int i = 0;i < 9;i++)
 	{
@@ -927,4 +931,10 @@ std::vector<std::vector<std::vector<int>>> Solver::returnCand()
 	this->findCandidate();
 	return this->cand;
 }
+
+std::vector<std::vector<int>> Solver::returnMethod()
+{
+	return this->method;
+}
+
 

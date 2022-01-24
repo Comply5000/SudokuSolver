@@ -14,6 +14,8 @@ private:
 	std::vector<std::vector<std::vector<int>>>cand;
 	bool solved = false;
 
+	std::vector<std::vector<int>> method;
+	
 public:
 	Solver(std::array<std::array<int, 9>, 9> tab);
 	~Solver();
@@ -22,12 +24,12 @@ public:
 	bool existInSquare(int y, int x, int k);
 	bool contains(std::vector<int> vec, const int& elem);
 	void findCandidate();
-	void singleCandidate();
-	void hiddenLoner();
+	void nakedSingle();
+	void hiddenSingle();
 	void lockedCandidate();
-	void openPairs();
-	void openTriples();
-	void hiddenPairs();
+	void nakedPair();
+	void nakedTriple();
+	void hiddenPair();
 	void xWing();
 
 	bool possible(int y,int x,int n);
@@ -36,5 +38,6 @@ public:
 	std::array<std::array<int, 9>, 9> returnAllNumbers();
 	std::array<std::array<int, 9>, 9> returnSingleNumber();
 	std::vector<std::vector<std::vector<int>>> returnCand();
+	std::vector<std::vector<int>> returnMethod();
 };
 

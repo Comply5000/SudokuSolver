@@ -1,10 +1,12 @@
 #pragma once
 #include<SFML\Graphics.hpp>
+#include<SFML/System.hpp>
 #include<string>
 #include<iostream>
 #include<vector>
 #include<array>
 #include<algorithm>
+#include<ctime>
 
 #include "Load.hpp"
 #include "Save.hpp"
@@ -27,6 +29,10 @@ private:
 	sf::RectangleShape loadButton;
 	sf::RectangleShape box[9][9];
 	sf::RectangleShape checkBox;
+	std::array<sf::RectangleShape,7> methodButton;
+	sf::RectangleShape listButton;
+	sf::RectangleShape upButton;
+	sf::RectangleShape downButton;
 
 	//Textures
 	sf::Texture boardTexture;
@@ -40,6 +46,9 @@ private:
 	sf::Texture candTexture[10];
 	sf::Texture checkedCandTexture[10];
 	sf::Texture checkBoxTexture[2];
+	sf::Texture methodTexture[7];
+	sf::Texture listTexture;
+
 
 	//Text
 	sf::Font font;
@@ -60,6 +69,15 @@ private:
 	//Checked CandBox
 	bool checkedCand[9][9][10];
 
+	//Select list logic
+	bool openList = false;
+	int methodType = -1;
+	std::vector<std::vector<int>>method; //lista z metodami (2 pierwsze wartoœci to koordynaty)
+	std::array<sf::Text,3> methodList; //3 tekst które siê wyœwietlaj¹
+	std::vector<std::string> listText; //metody zapisane w stringu
+	bool candMethod[9][9][10];
+	int startPoint = 0;
+
 	//Private functions
 	void initWindow();
 	void initBoard();
@@ -67,6 +85,8 @@ private:
 	void initBoxes();
 	void drawBoxes();
 	void initCand();
+	void initMethodButtons();
+	void drawMethodButtons();
 
 public:
 	Sudoku();
@@ -84,6 +104,12 @@ public:
 	void updateCand();
 	void updateCandColor();
 	void drawCand();
+
+	void updateList();
+	void updateMethod();
+	void updateMethodList();
+	void updateStartPosition();
+	void methodResult();
 
 	void update();
 	void render();
