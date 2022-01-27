@@ -98,14 +98,11 @@ void Solver::nakedSingle()
 	{
 		for (int j = 0;j < 9;j++)
 		{
+			std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
 			if (this->cand[i][j].size() == 1 && this->cand[i][j][0] != 10)
 			{
-				this->number[i][j] = this->cand[i][j][0];
-				std::vector<int> tab;
-				tab.push_back(i);
-				tab.push_back(j);
-				tab.push_back(this->cand[i][j][0]);
-				this->method.push_back(tab);
+				oneMethod[i][j].push_back(this->cand[i][j][0]);
+				this->method.push_back(oneMethod);
 			}
 		}
 	}
@@ -113,23 +110,24 @@ void Solver::nakedSingle()
 
 void Solver::hiddenSingle() //ukryty kandydat
 {
+	this->findCandidate();
 	for (int i = 0;i < 9;i++) //iteracja po wierszach
 	{
 		for (int j = 0;j < 9;j++)
 		{
-			if (this->cand[i][j].size() > 0 && this->cand[i][j][0] != 10) // pole nie jest uzupe³nione
+			if (this->cand[i][j].size() > 0 && this->cand[i][j][0] != 10)// pole nie jest uzupe³nione
 			{
 				for (int k = 0;k < this->cand[i][j].size();k++) //iteracja po kandydatach w polu
 				{
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
 					int n = 0;
 					for (int a = 0;a < 9;a++) //ponowna iteracja po wszystkich polach w wierszu aby sparawdziæ ile jest tych kandydatów
 						if (this->cand[i][a][0] != 10 && this->contains(this->cand[i][a], this->cand[i][j][k]))
 							n++;
 					if (n == 1) //je¿eli jest tylko 1 kandydat: uzupe³nienie bloku tym kandydatem
 					{
-						this->number[i][j] = this->cand[i][j][k];
-						this->solved = true;
-						return;
+						oneMethod[i][j].push_back(this->cand[i][j][k]);
+						this->method.push_back(oneMethod);
 					}
 				}
 			}
@@ -145,15 +143,15 @@ void Solver::hiddenSingle() //ukryty kandydat
 			{
 				for (int k = 0;k < this->cand[i][j].size();k++)
 				{
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
 					int n = 0;
 					for (int a = 0;a < 9;a++)
 						if (this->cand[a][j][0] != 10 && this->contains(this->cand[a][j], this->cand[i][j][k]))
 							n++;
 					if (n == 1)
 					{
-						this->number[i][j] = this->cand[i][j][k];
-						this->solved = true;
-						return;
+						oneMethod[i][j].push_back(this->cand[i][j][k]);
+						this->method.push_back(oneMethod);
 					}
 				}
 			}
@@ -172,6 +170,7 @@ void Solver::hiddenSingle() //ukryty kandydat
 					{
 						for (int k = 0;k < this->cand[i][j].size();k++)
 						{
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
 							int n = 0;
 							for (int a = y;a < y + 3;a++)
 								for (int b = x;b < x + 3;b++)
@@ -179,9 +178,8 @@ void Solver::hiddenSingle() //ukryty kandydat
 										n++;
 							if (n == 1)
 							{
-								this->number[i][j] = this->cand[i][j][k];
-								this->solved = true;
-								return;
+								oneMethod[i][j].push_back(this->cand[i][j][k]);
+								this->method.push_back(oneMethod);
 							}
 						}
 					}
@@ -189,6 +187,8 @@ void Solver::hiddenSingle() //ukryty kandydat
 			}
 		}
 	}
+	sort(this->method.begin(), this->method.end());
+	this->method.erase(unique(this->method.begin(), this->method.end()), this->method.end());
 }
 
 void Solver::lockedCandidate()
@@ -317,53 +317,12 @@ void Solver::lockedCandidate()
 			}
 		}
 	}
-	for (int y = 0;y <= 6;y += 3)
-	{
-		for (int x = 0;x <= 6;x += 3)
-		{
-			for (int j = y;j < y + 3;j++)
-			{
-				for (int i = x;i < x + 3;i++)
-				{
-					if (this->cand[i][j].size() > 0 && this->cand[i][j][0] != 10)
-					{
-						for (int k = 0;k < this->cand[i][j].size();k++)
-						{
-							int exist = 0;
-							for (int b = y;b < y + 3;b++)
-							{
-								for (int a = x;a < x + 3;a++)
-								{
-									if (this->contains(this->cand[a][b], this->cand[i][j][k]))
-									{
-										exist++;
-										break;
-									}
-								}
-							}
-							if (exist == 1)
-							{
-								int n;
-								if (i < 3) n = 0;
-								else if (i >= 3 && i < 6) n = 3;
-								else if (i >= 6) n = 6;
-
-								for (int a = 0;a < 9;a++)
-									if (a != n && a != n + 1 && a != n + 2)
-										for (int b = 0;b < this->cand[a][j].size();b++)
-											if (this->cand[a][j][b] == this->cand[i][j][k])
-												this->cand[a][j].erase(this->cand[a][j].begin() + b);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 }
 
 void Solver::nakedPair()
 {
+	this->findCandidate();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> row;
 	for (int i = 0;i < 9;i++) //iteracja po wierszu
 	{
 		for (int j = 0;j < 9;j++) //iteracja po kolumnie
@@ -376,15 +335,35 @@ void Solver::nakedPair()
 					{
 						int e1 = this->cand[i][j][0]; // zapisanie tych kandydatów
 						int e2 = this->cand[i][j][1];
-						for (int b = 0;b < 9;b++)
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+						oneMethod[i][j].push_back(e1);
+						oneMethod[i][j].push_back(e2);
+						oneMethod[i][a].push_back(e1);
+						oneMethod[i][a].push_back(e2);
+
+						bool existMethod = false;
+						for (int z = 0;z < row.size();z++)
+							if (row[z] == oneMethod)
+								existMethod = true;
+						if (!existMethod)
 						{
-							for (int c = 0;c < this->cand[i][b].size();c++) //usuwanie zapisanych kandydatów z pól (oprócz tych pól które zawieraj¹ dok³adnie tych kandydatów)
+							row.push_back(oneMethod);
+							this->structureType.push_back(0);
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+							for (int b = 0;b < 9;b++)
 							{
-								if (b != j && b != a && (this->cand[i][b][c] == e1 || this->cand[i][b][c] == e2))
+								for (int c = 0;c < this->cand[i][b].size();c++) //usuwanie zapisanych kandydatów z pól (oprócz tych pól które zawieraj¹ dok³adnie tych kandydatów)
 								{
-									this->cand[i][b].erase(this->cand[i][b].begin() + c);
+									if (b != j && b != a)
+									{
+										if (this->cand[i][b][c] == e1)
+											oneMethodDel[i][b].push_back(e1);
+										else if (this->cand[i][b][c] == e2)
+											oneMethodDel[i][b].push_back(e2);
+									}
 								}
 							}
+							this->methodDel.push_back(oneMethodDel);
 						}
 					}
 				}
@@ -393,6 +372,7 @@ void Solver::nakedPair()
 	}
 
 	//to samo tylko po kolumnach
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> col;
 	for (int j = 0;j < 9;j++)
 	{
 		for (int i = 0;i < 9;i++)
@@ -405,15 +385,35 @@ void Solver::nakedPair()
 					{
 						int e1 = this->cand[i][j][0];
 						int e2 = this->cand[i][j][1];
-						for (int b = 0;b < 9;b++)
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+						oneMethod[i][j].push_back(e1);
+						oneMethod[i][j].push_back(e2);
+						oneMethod[a][j].push_back(e1);
+						oneMethod[a][j].push_back(e2);
+
+						bool existMethod = false;
+						for (int z = 0;z < col.size();z++)
+							if (col[z] == oneMethod)
+								existMethod = true;
+						if (!existMethod)
 						{
-							for (int c = 0;c < this->cand[b][j].size();c++)
+							col.push_back(oneMethod);
+							this->structureType.push_back(1);
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+							for (int b = 0;b < 9;b++)
 							{
-								if (b != i && b != a && (this->cand[b][j][c] == e1 || this->cand[b][j][c] == e2))
+								for (int c = 0;c < this->cand[b][j].size();c++)
 								{
-									this->cand[b][j].erase(this->cand[b][j].begin() + c);
-								}
+									if (b != i && b != a)
+									{
+										if (this->cand[b][j][c] == e1)
+											oneMethodDel[b][j].push_back(e1);
+										else if (this->cand[b][j][c] == e2)
+											oneMethodDel[b][j].push_back(e2);
+									}
+								}							
 							}
+							this->methodDel.push_back(oneMethodDel);
 						}
 					}
 				}
@@ -421,6 +421,8 @@ void Solver::nakedPair()
 		}
 	}
 
+
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrt;
 	for (int y = 0;y <= 6;y += 3) // x,y - pêtle odpowiedzialne za przemieszczanie siê pobiêdzy 9 boxami 
 	{
 		for (int x = 0;x <= 6;x += 3)
@@ -439,19 +441,39 @@ void Solver::nakedPair()
 								{
 									int e1 = this->cand[i][j][0]; //zapisanie tych kandydatów
 									int e2 = this->cand[i][j][1];
-									for (int c = y;c < y + 3;c++) //iteracja po polach w boxie
+									std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+									oneMethod[i][j].push_back(e1);
+									oneMethod[i][j].push_back(e2);
+									oneMethod[a][b].push_back(e1);
+									oneMethod[a][b].push_back(e2);
+
+									bool existMethod = false;
+									for (int z = 0;z < sqrt.size();z++)
+										if (sqrt[z] == oneMethod)
+											existMethod = true;
+									if (!existMethod)
 									{
-										for (int d = x;d < x + 3;d++)
+										sqrt.push_back(oneMethod);
+										this->structureType.push_back(2);
+										std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+										for (int c = y;c < y + 3;c++) //iteracja po polach w boxie
 										{
-											for (int e = 0;e < this->cand[c][d].size();e++) //usuwanie zapisanych kandydatów z pól (oprócz tych pól które zawieraj¹ dok³adnie tych kandydatów)
+											for (int d = x;d < x + 3;d++)
 											{
-												if (this->cand[c][d] != this->cand[i][j] && this->cand[c][d] != this->cand[a][b] && (this->cand[c][d][e] == e1 || this->cand[c][d][e] == e2))
+												for (int e = 0;e < this->cand[c][d].size();e++) //usuwanie zapisanych kandydatów z pól (oprócz tych pól które zawieraj¹ dok³adnie tych kandydatów)
 												{
-													this->cand[c][d].erase(this->cand[c][d].begin() + e);
+													if (this->cand[c][d] != this->cand[i][j] && this->cand[c][d] != this->cand[a][b] && (this->cand[c][d][e] == e1 || this->cand[c][d][e] == e2))
+													{
+														if (this->cand[c][d][e] == e1)
+															oneMethodDel[c][d].push_back(e1);
+														else if (this->cand[c][d][e] == e2)
+															oneMethodDel[c][d].push_back(e2);
+													}
 												}
 											}
 										}
-									}
+										this->methodDel.push_back(oneMethodDel);
+									}									
 								}
 							}
 						}
@@ -460,6 +482,12 @@ void Solver::nakedPair()
 			}
 		}
 	}
+	for (int i = 0;i < row.size();i++)
+		this->method.push_back(row[i]);
+	for (int i = 0;i < col.size();i++)
+		this->method.push_back(col[i]);
+	for (int i = 0;i < sqrt.size();i++)
+		this->method.push_back(sqrt[i]);
 }
 
 void Solver::nakedTriple()
@@ -932,9 +960,19 @@ std::vector<std::vector<std::vector<int>>> Solver::returnCand()
 	return this->cand;
 }
 
-std::vector<std::vector<int>> Solver::returnMethod()
+std::vector<std::array<std::array<std::vector<int>, 9>, 9>> Solver::returnMethod()
 {
 	return this->method;
+}
+
+std::vector<std::array<std::array<std::vector<int>, 9>, 9>> Solver::returnMethodDel()
+{
+	return this->methodDel;
+}
+
+std::vector<int> Solver::returnStructureType()
+{
+	return this->structureType;
 }
 
 

@@ -14,7 +14,9 @@ private:
 	std::vector<std::vector<std::vector<int>>>cand;
 	bool solved = false;
 
-	std::vector<std::vector<int>> method;
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> method;
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> methodDel;
+	std::vector<int> structureType;
 	
 public:
 	Solver(std::array<std::array<int, 9>, 9> tab);
@@ -38,6 +40,8 @@ public:
 	std::array<std::array<int, 9>, 9> returnAllNumbers();
 	std::array<std::array<int, 9>, 9> returnSingleNumber();
 	std::vector<std::vector<std::vector<int>>> returnCand();
-	std::vector<std::vector<int>> returnMethod();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> returnMethod();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> returnMethodDel();
+	std::vector<int> returnStructureType();
 };
 

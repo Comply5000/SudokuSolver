@@ -151,13 +151,15 @@ void Sudoku::initMethodButtons()
 		this->text.setFillColor(sf::Color::White);
 	}
 
-	this->upButton.setPosition(900.f, 750.f);
-	this->upButton.setSize(sf::Vector2f(50.f, 50.f));
-	this->upButton.setFillColor(sf::Color::Red);
+	this->upButton.setPosition(920.f, 715.f);
+	this->upButton.setSize(sf::Vector2f(60.f, 60.f));
+	this->upTexture.loadFromFile("Textures/up.png");
+	this->upButton.setTexture(&this->upTexture);
 
-	this->downButton.setPosition(900.f, 800.f);
-	this->downButton.setSize(sf::Vector2f(50.f, 50.f));
-	this->downButton.setFillColor(sf::Color::Green);
+	this->downButton.setPosition(920.f, 775.f);
+	this->downButton.setSize(sf::Vector2f(60.f, 60.f));
+	this->downTexture.loadFromFile("Textures/down.png");
+	this->downButton.setTexture(&this->downTexture);
 }
 
 void Sudoku::drawMethodButtons()
@@ -510,6 +512,21 @@ void Sudoku::menu() //wywo³ywanie klas i funkcji po naciœniêciu przycisków
 		load.readFile();
 		this->number = load.returnNumber();
 		this->updateNumbers();
+
+		//Wyczyszczenie wszystkich wartoœci w wyœwietlaniu metod
+		for (int i = 0;i < 3;i++)
+			this->methodNumber[i] = i;
+
+		this->selectedMethod = -1;
+		this->startPoint = 0;
+
+		for (int i = 0;i < 9;i++)
+			for (int j = 0;j < 9;j++)
+				for (int k = 0;k < 10;k++)
+				{
+					this->candMethod[i][j][k] = false;
+					this->candMethodDel[i][j][k] = false;
+				}
 	}
 
 	else if (this->saveButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -669,10 +686,20 @@ void Sudoku::updateList() //rozwijanie i klikanie listy
 			this->methodType = -1;
 			this->listButton.setTexture(&this->listTexture);
 
+
+			for (int i = 0;i < 3;i++)
+				this->methodNumber[i] = i;
+
+			this->selectedMethod = -1;
+			this->startPoint = 0;
+
 			for (int i = 0;i < 9;i++)
 				for (int j = 0;j < 9;j++)
 					for (int k = 0;k < 10;k++)
+					{
 						this->candMethod[i][j][k] = false;
+						this->candMethodDel[i][j][k] = false;
+					}
 		}
 
 		for (int i = 0;i < this->methodButton.size();i++)
@@ -683,6 +710,21 @@ void Sudoku::updateList() //rozwijanie i klikanie listy
 				this->openList = false;
 				this->methodType = i;
 				this->listButton.setTexture(&this->methodTexture[i]);
+
+
+				for (int i = 0;i < 3;i++)
+					this->methodNumber[i] = i;
+
+				this->selectedMethod = -1;
+				this->startPoint = 0;
+
+				for (int i = 0;i < 9;i++)
+					for (int j = 0;j < 9;j++)
+						for (int k = 0;k < 10;k++)
+						{
+							this->candMethod[i][j][k] = false;
+							this->candMethodDel[i][j][k] = false;
+						}
 			}
 		}
 	}
@@ -704,18 +746,77 @@ void Sudoku::updateMethod() //pobieranie wartoœci metod z klasy Solver i zapis d
 	}
 	if (this->methodType == 0)
 	{
+		this->methodDel.clear();
 		solver.nakedSingle();
 		this->method = solver.returnMethod();
-		for (int i = 0;i < this->method.size();i++)
+		for (int m = 0;m < this->method.size();m++)
 		{
-			std::string text = std::to_string(i+1) + ". The cell R" + std::to_string(method[i][0]+1) + "C" + std::to_string(method[i][1]+1) + " can contain only the value " + std::to_string(method[i][2]);
-			this->listText.push_back(text);
+			for (int i = 0;i < 9;i++)
+			{
+				for (int j = 0;j < 9;j++)
+				{
+					if (this->method[m][i][j].size() > 0)
+					{
+						std::string text = std::to_string(m + 1) + ". The cell R" + std::to_string(i+1) + "C" + std::to_string(j+1) + " can contain only the value " + std::to_string(this->method[m][i][j][0]);
+						this->listText.push_back(text);
+					}
+				}
+			}
 		}
 		this->updateMethodList();
 	}
 	else if (this->methodType == 1)
 	{
-
+		this->methodDel.clear();
+		solver.hiddenSingle();
+		this->method = solver.returnMethod();
+		for (int m = 0;m < this->method.size();m++)
+		{
+			for (int i = 0;i < 9;i++)
+			{
+				for (int j = 0;j < 9;j++)
+				{
+					if (this->method[m][i][j].size() > 0)
+					{
+						std::string text = std::to_string(m + 1) + ". The cell R" + std::to_string(i + 1) + "C" + std::to_string(j + 1) + " can contain only the value " + std::to_string(this->method[m][i][j][0]);
+						this->listText.push_back(text);
+					}
+				}
+			}
+		}
+		this->updateMethodList();
+	}
+	else if (this->methodType == 3)
+	{
+		solver.nakedPair();
+		this->method = solver.returnMethod();
+		this->methodDel = solver.returnMethodDel();
+		this->structureType = solver.returnStructureType();
+		for (int m = 0;m < this->method.size();m++)
+		{
+			std::string type;
+			if (this->structureType[m] == 0)
+				type = "row";
+			else if (this->structureType[m] == 1)
+				type = "column";
+			else if (this->structureType[m] == 2)
+				type = "square";
+			std::vector<std::string> box;
+			for (int i = 0;i < 9;i++)
+			{
+				for (int j = 0;j < 9;j++)
+				{
+					if (this->method[m][i][j].size() > 0)
+					{
+						std::string t = "R" + std::to_string(i + 1) + "C" + std::to_string(j + 1);
+						box.push_back(t);
+					}					
+				}
+			}
+			std::string text = std::to_string(m + 1) + ". "+box[0]+" and "+box[1]+ " create pair in "+type;
+			this->listText.push_back(text);
+		}
+		this->updateMethodList();
 	}
 }
 
@@ -741,13 +842,21 @@ void Sudoku::updateStartPosition() //mechanizm przewijania listy z wynikami
 		{
 			pressed = true;
 			if (this->startPoint < listText.size() - 3)
+			{
 				this->startPoint++;
+				for (int i = 0;i < 3;i++)
+					this->methodNumber[i]++;
+			}
 		}
 		else if (this->upButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left) && !pressed)
 		{
 			pressed = true;
 			if (this->startPoint > 0)
+			{
 				this->startPoint--;
+				for (int i = 0;i < 3;i++)
+					this->methodNumber[i]--;
+			}
 		}
 	}
 	if (this->ev.type == sf::Event::MouseButtonReleased)
@@ -757,25 +866,63 @@ void Sudoku::updateStartPosition() //mechanizm przewijania listy z wynikami
 
 void Sudoku::methodResult() //koloruje kandydatów którzy
 {
-	for (int i = 0;i < 3;i++)
+	for (int l = 0;l < 3;l++)
 	{
-		if (this->methodList[i].getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		if (this->methodList[l].getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
 			for (int i = 0;i < 9;i++)
 				for (int j = 0;j < 9;j++)
 					for (int k = 0;k < 10;k++)
+					{
 						this->candMethod[i][j][k] = false;
-			for (int k = 0;k < this->cand[method[startPoint + i][0]][method[startPoint + i][1]].size();k++)
-				if (this->cand[method[startPoint + i][0]][method[startPoint + i][1]][k] == this->method[startPoint + i][2])
-					this->candMethod[method[startPoint + i][0]][method[startPoint + i][1]][k] = true;
+						this->candMethodDel[i][j][k] = false;
+					}
+
+			this->selectedMethod = this->methodNumber[l];
+
+			for (int i = 0;i < 9;i++)
+				for (int j = 0;j < 9;j++)
+					for (int k = 0;k < this->cand[i][j].size();k++)
+					{
+						if (this->contains(this->method[this->selectedMethod][i][j], this->cand[i][j][k]))
+							this->candMethod[i][j][k] = true;
+						if (this->methodType != 0 && this->methodType != 1 && this->contains(this->methodDel[this->selectedMethod][i][j], this->cand[i][j][k]))
+							this->candMethodDel[i][j][k] = true;
+					}
 		}
+	}
+
+	for (int i = 0;i < 3;i++)
+	{
+		if (this->methodNumber[i] == this->selectedMethod)
+			this->methodList[i].setFillColor(sf::Color::Green);
+		else
+			this->methodList[i].setFillColor(sf::Color::White);
 	}
 
 	for (int i = 0;i < 9;i++)
 		for (int j = 0;j < 9;j++)
 			for (int k = 0;k < 10;k++)
+			{
 				if (candMethod[i][j][k])
 					this->candBox[i][j][k].setFillColor(sf::Color::Green);
+				if (candMethodDel[i][j][k])
+					this->candBox[i][j][k].setFillColor(sf::Color::Red);
+			}
+}
+
+bool Sudoku::contains(std::vector<int> vec, const int& elem)
+{
+	bool result = false;
+	for (auto& x : vec)
+	{
+		if (x == elem)
+		{
+			result = true;
+			break;
+		}
+	}
+	return result;
 }
 
 void Sudoku::update()

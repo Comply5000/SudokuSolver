@@ -48,6 +48,8 @@ private:
 	sf::Texture checkBoxTexture[2];
 	sf::Texture methodTexture[7];
 	sf::Texture listTexture;
+	sf::Texture upTexture;
+	sf::Texture downTexture;
 
 
 	//Text
@@ -72,10 +74,15 @@ private:
 	//Select list logic
 	bool openList = false;
 	int methodType = -1;
-	std::vector<std::vector<int>>method; //lista z metodami (2 pierwsze wartoœci to koordynaty)
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> method; //lista z metodami 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> methodDel;
+	std::vector<int> structureType; //typ strukturey np. kolumna
 	std::array<sf::Text,3> methodList; //3 tekst które siê wyœwietlaj¹
 	std::vector<std::string> listText; //metody zapisane w stringu
+	std::array<int, 3> methodNumber;
+	int selectedMethod = -1;
 	bool candMethod[9][9][10];
+	bool candMethodDel[9][9][10];
 	int startPoint = 0;
 
 	//Private functions
@@ -110,6 +117,7 @@ public:
 	void updateMethodList();
 	void updateStartPosition();
 	void methodResult();
+	bool contains(std::vector<int> vec, const int& elem);
 
 	void update();
 	void render();
