@@ -193,6 +193,9 @@ void Solver::hiddenSingle() //ukryty kandydat
 
 void Solver::lockedCandidate()
 {
+	this->findCandidate();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> row;
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> rowDel;
 	for (int i = 0;i < 9;i++) //iteracja po wierszach
 	{
 		for (int j = 0;j < 9;j++)
@@ -216,6 +219,8 @@ void Solver::lockedCandidate()
 					}
 					if (exist == 1) //je¿eli kandydaci wystêpuj¹ tylko w polach które nale¿y do tylko jednego kwadratu
 					{
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 						int n; //ustalenie linii kolumny
 						if (i < 3) n = 0;
 						else if (i >= 3 && i < 6) n = 3;
@@ -223,16 +228,42 @@ void Solver::lockedCandidate()
 
 						for (int y = n;y < n + 3;y++) // iteracja po polach w kwardacie
 							for (int x = line;x < line + 3;x++)
-								if (y != i)
 									for (int a = 0;a < this->cand[y][x].size();a++) //usniêcie kandydata z pól kwadratu który nie le¿y na linii y 
 										if (this->cand[y][x][a] == this->cand[i][j][k])
-											this->cand[y][x].erase(this->cand[y][x].begin() + a);
+										{
+											if (y != i)
+												oneMethodDel[y][x].push_back(this->cand[y][x][a]);
+											else
+												oneMethod[y][x].push_back(this->cand[y][x][a]);
+										}
+
+						bool existMethod = false;
+						int l = 0;
+						for (int a = 0;a < 9;a++)
+							for (int b = 0;b < 9;b++)
+								if (oneMethodDel[a][b].size() == 0)
+									l++;
+						if(l==81)
+							existMethod = true;
+						for (int z = 0;z < row.size();z++)
+							if (row[z] == oneMethod)
+								existMethod = true;
+
+						if (!existMethod)
+						{
+							rowDel.push_back(oneMethodDel);
+							row.push_back(oneMethod);
+							structureType.push_back(0);
+						}
+
 					}
 				}
 			}
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> col;
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> colDel;
 	for (int j = 0;j < 9;j++) //iteracja po kolumnach
 	{
 		for (int i = 0;i < 9;i++)
@@ -256,6 +287,8 @@ void Solver::lockedCandidate()
 					}
 					if (exist == 1) //je¿eli kandydaci wystêpuj¹ tylko w polach które nale¿y do tylko jednego kwadratu
 					{
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+						std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 						int n; //ustalenie linii wiersza
 						if (j < 3) n = 0;
 						else if (j >= 3 && j < 6) n = 3;
@@ -263,10 +296,33 @@ void Solver::lockedCandidate()
 
 						for (int x = n;x < n + 3;x++) // iteracja po polach w kwardacie
 							for (int y = line;y < line + 3;y++)
-								if (x != j)
 									for (int a = 0;a < this->cand[y][x].size();a++) //susniêcie kandydata z pól kwadratu który nie le¿y na linii y 
 										if (this->cand[y][x][a] == this->cand[i][j][k])
-											this->cand[y][x].erase(this->cand[y][x].begin() + a);
+										{
+											if (x != j)
+												oneMethodDel[y][x].push_back(this->cand[y][x][a]);
+											else
+												oneMethod[y][x].push_back(this->cand[y][x][a]);
+										}
+
+						bool existMethod = false;
+						int l = 0;
+						for (int a = 0;a < 9;a++)
+							for (int b = 0;b < 9;b++)
+								if (oneMethodDel[a][b].size() == 0)
+									l++;
+						if (l == 81)
+							existMethod = true;
+						for (int z = 0;z < col.size();z++)
+							if (col[z] == oneMethod)
+								existMethod = true;
+
+						if (!existMethod)
+						{
+							colDel.push_back(oneMethodDel);
+							col.push_back(oneMethod);
+							structureType.push_back(1);
+						}
 					}
 				}
 
@@ -274,6 +330,8 @@ void Solver::lockedCandidate()
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrt;
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrtDel;
 	for (int y = 0;y <= 6;y += 3) // iteracja po kwadratach
 	{
 		for (int x = 0;x <= 6;x += 3)
@@ -300,16 +358,41 @@ void Solver::lockedCandidate()
 							}
 							if (exist == 1)//wystêpuje tylko w 1 wierszu
 							{
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 								int n;
 								if (j < 3) n = 0;
 								else if (j >= 3 && j < 6) n = 3;
 								else if (j >= 6) n = 6;
 
 								for (int a = 0;a < 9;a++) //usuniêcie kandydata z wiersza (z wy³¹czeniem pól które s¹ w kwadracie)
-									if (a != n && a != n + 1 && a != n + 2)
 										for (int b = 0;b < this->cand[i][a].size();b++)
 											if (this->cand[i][a][b] == this->cand[i][j][k])
-												this->cand[i][a].erase(this->cand[i][a].begin() + b);
+											{
+												if (a != n && a != n + 1 && a != n + 2)
+													oneMethodDel[i][a].push_back(this->cand[i][a][b]);
+												else
+													oneMethod[i][a].push_back(this->cand[i][a][b]);
+											}
+
+								bool existMethod = false;
+								int l = 0;
+								for (int a = 0;a < 9;a++)
+									for (int b = 0;b < 9;b++)
+										if (oneMethodDel[a][b].size() == 0)
+											l++;
+								if (l == 81)
+									existMethod = true;
+								for (int z = 0;z < sqrt.size();z++)
+									if (sqrt[z] == oneMethod)
+										existMethod = true;
+
+								if (!existMethod)
+								{
+									sqrtDel.push_back(oneMethodDel);
+									sqrt.push_back(oneMethod);
+									structureType.push_back(2);
+								}
 							}
 						}
 					}
@@ -317,6 +400,20 @@ void Solver::lockedCandidate()
 			}
 		}
 	}
+	this->method = row;
+	this->methodDel = rowDel;
+	for (int i = 0;i < col.size();i++)
+	{
+		method.push_back(col[i]);
+		methodDel.push_back(colDel[i]);
+	}
+	for (int i = 0;i < sqrt.size();i++)
+	{
+		method.push_back(sqrt[i]);
+		methodDel.push_back(sqrtDel[i]);
+	}
+
+
 }
 
 void Solver::nakedPair()

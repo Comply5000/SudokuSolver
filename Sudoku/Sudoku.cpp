@@ -499,6 +499,14 @@ void Sudoku::menu() //wywo³ywanie klas i funkcji po naciœniêciu przycisków
 					this->checkedCand[i][j][k] = false;
 			}
 		}
+
+		for (int i = 0;i < 9;i++)
+			for (int j = 0;j < 9;j++)
+				for (int k = 0;k < 10;k++)
+				{
+					this->candMethod[i][j][k] = false;
+					this->candMethodDel[i][j][k] = false;
+				}
 	}
 
 	else if (this->loadButton.getGlobalBounds().contains(this->mousePosition) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -786,12 +794,39 @@ void Sudoku::updateMethod() //pobieranie wartoœci metod z klasy Solver i zapis d
 		}
 		this->updateMethodList();
 	}
+	else if (this->methodType == 2)
+	{
+		solver.lockedCandidate();
+		this->method = solver.returnMethod();
+		this->methodDel = solver.returnMethodDel();
+		this->structureType = solver.returnStructureType();
+		/*for (int m = 0;m < this->method.size();m++)
+		{
+			std::string text = std::to_string(m + 1);
+			this->listText.push_back(text);
+		}*/
+		for (int m = 0;m < this->method.size();m++)
+		{
+			std::string type;
+			if (this->structureType[m] == 0)
+				type = "row";
+			else if (this->structureType[m] == 1)
+				type = "column";
+			else if (this->structureType[m] == 2)
+				type = "square";			
+			std::string text = std::to_string(m + 1) + ". Locket candidate in "+ type;
+			this->listText.push_back(text);
+		}
+
+		this->updateMethodList();
+	}
 	else if (this->methodType == 3)
 	{
 		solver.nakedPair();
 		this->method = solver.returnMethod();
 		this->methodDel = solver.returnMethodDel();
 		this->structureType = solver.returnStructureType();
+
 		for (int m = 0;m < this->method.size();m++)
 		{
 			std::string type;
@@ -864,7 +899,7 @@ void Sudoku::updateStartPosition() //mechanizm przewijania listy z wynikami
 			pressed = false;
 }
 
-void Sudoku::methodResult() //koloruje kandydatów którzy
+void Sudoku::methodResult() //koloruje kandydatów wed³ug metody
 {
 	for (int l = 0;l < 3;l++)
 	{
