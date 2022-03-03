@@ -518,7 +518,6 @@ void Solver::nakedPair()
 		}
 	}
 
-
 	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrt;
 	for (int y = 0;y <= 6;y += 3) // x,y - pêtle odpowiedzialne za przemieszczanie siê pobiêdzy 9 boxami 
 	{
@@ -589,6 +588,8 @@ void Solver::nakedPair()
 
 void Solver::nakedTriple()
 {
+	this->findCandidate();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> row;
 	for (int i = 0;i < 9;i++)
 	{
 		for (int j = 0;j < 9;j++)
@@ -614,23 +615,41 @@ void Solver::nakedTriple()
 				}
 				if (line.size() == 3) // je¿eli istniej¹ 3 takie pola
 				{
-					for (int a = 0;a < 9;a++)
-						if (a != line[0] && a != line[1] && a != line[2])
-							for (int b = 0;b < this->cand[i][a].size();b++)
-							{
-								if (this->cand[i][a][b] == this->cand[i][j][0])
-									this->cand[i][a].erase(this->cand[i][a].begin() + b);
-								if (this->cand[i][a][b] == this->cand[i][j][1])
-									this->cand[i][a].erase(this->cand[i][a].begin() + b);
-								if (this->cand[i][a][b] == this->cand[i][j][2])
-									this->cand[i][a].erase(this->cand[i][a].begin() + b);
-							}
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+					
+					for(int q = 0;q<3;q++)
+						for(int l = 0;l<cand[i][line[q]].size();l++)
+							oneMethod[i][line[q]].push_back(cand[i][line[q]][l]);
 
+					bool existMethod = false;
+					for (int z = 0;z < row.size();z++)
+						if (row[z] == oneMethod)
+							existMethod = true;
+					if (!existMethod)
+					{
+						row.push_back(oneMethod);
+						this->structureType.push_back(0);
+						for (int a = 0;a < 9;a++)
+							if (a != line[0] && a != line[1] && a != line[2])
+								for (int b = 0;b < this->cand[i][a].size();b++)
+								{
+									if (this->cand[i][a][b] == this->cand[i][j][0])
+										oneMethodDel[i][a].push_back(this->cand[i][a][b]);
+									if (this->cand[i][a][b] == this->cand[i][j][1])
+										oneMethodDel[i][a].push_back(this->cand[i][a][b]);
+									if (this->cand[i][a][b] == this->cand[i][j][2])
+										oneMethodDel[i][a].push_back(this->cand[i][a][b]);
+								}
+
+						this->methodDel.push_back(oneMethodDel);
+					}
 				}
 			}
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> col;
 	for (int j = 0;j < 9;j++)
 	{
 		for (int i = 0;i < 9;i++)
@@ -656,22 +675,42 @@ void Solver::nakedTriple()
 				}
 				if (line.size() == 3)
 				{
-					for (int a = 0;a < 9;a++)
-						if (a != line[0] && a != line[1] && a != line[2])
-							for (int b = 0;b < this->cand[a][j].size();b++)
-							{
-								if (this->cand[a][j][b] == this->cand[i][j][0])
-									this->cand[a][j].erase(this->cand[a][j].begin() + b);
-								if (this->cand[a][j][b] == this->cand[i][j][1])
-									this->cand[a][j].erase(this->cand[a][j].begin() + b);
-								if (this->cand[a][j][b] == this->cand[i][j][2])
-									this->cand[a][j].erase(this->cand[a][j].begin() + b);
-							}
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+					std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+
+					for (int q = 0;q < 3;q++)
+						for (int l = 0;l < cand[line[q]][j].size();l++)
+							oneMethod[line[q]][j].push_back(cand[line[q]][j][l]);
+
+					bool existMethod = false;
+					for (int z = 0;z < col.size();z++)
+						if (col[z] == oneMethod)
+							existMethod = true;
+
+					if (!existMethod)
+					{
+						col.push_back(oneMethod);
+						this->structureType.push_back(1);
+						for (int a = 0;a < 9;a++)
+							if (a != line[0] && a != line[1] && a != line[2])
+								for (int b = 0;b < this->cand[i][a].size();b++)
+								{
+									if (this->cand[a][j][b] == this->cand[i][j][0])
+										oneMethodDel[a][j].push_back(this->cand[a][j][b]);
+									if (this->cand[a][j][b] == this->cand[i][j][1])
+										oneMethodDel[a][j].push_back(this->cand[a][j][b]);
+									if (this->cand[a][j][b] == this->cand[i][j][2])
+										oneMethodDel[a][j].push_back(this->cand[a][j][b]);
+								}
+
+						this->methodDel.push_back(oneMethodDel);
+					}
 				}
 			}
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrt;
 	for (int y = 0;y <= 6;y += 3) // x,y - pêtle odpowiedzialne za przemieszczanie siê pobiêdzy 9 boxami 
 	{
 		for (int x = 0;x <= 6;x += 3)
@@ -706,24 +745,52 @@ void Solver::nakedTriple()
 						}
 						if (box.size() == 3)
 						{
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+
 							for (int a = y;a < y + 3;a++)
 								for (int b = x;b < x + 3;b++)
-									if (this->cand[a][b] != box[0] && this->cand[a][b] != box[1] && this->cand[a][b] != box[2])
-										for (int c = 0;c < this->cand[a][b].size();c++)
-										{
-											if (this->cand[a][b][c] == this->cand[i][j][0])
-												this->cand[a][b].erase(this->cand[a][b].begin() + c);
-											if (this->cand[a][b][c] == this->cand[i][j][1])
-												this->cand[a][b].erase(this->cand[a][b].begin() + c);
-											if (this->cand[a][b][c] == this->cand[i][j][2])
-												this->cand[a][b].erase(this->cand[a][b].begin() + c);
-										}
+									for (int q = 0;q < 3;q++)
+										if (cand[a][b] == box[q])
+											for (int l = 0;l < cand[a][b].size();l++)
+												oneMethod[a][b].push_back(cand[a][b][l]);
+									
+							bool existMethod = false;
+							for (int z = 0;z < col.size();z++)
+								if (col[z] == oneMethod)
+									existMethod = true;
+
+							if (!existMethod)
+							{
+								sqrt.push_back(oneMethod);
+								this->structureType.push_back(2);
+								for (int a = y;a < y + 3;a++)
+									for (int b = x;b < x + 3;b++)
+										if (this->cand[a][b] != box[0] && this->cand[a][b] != box[1] && this->cand[a][b] != box[2])
+											for (int c = 0;c < this->cand[a][b].size();c++)
+											{
+												if (this->cand[a][b][c] == this->cand[i][j][0])
+													oneMethodDel[a][b].push_back(this->cand[a][b][c]);
+												if (this->cand[a][b][c] == this->cand[i][j][1])
+													oneMethodDel[a][b].push_back(this->cand[a][b][c]);
+												if (this->cand[a][b][c] == this->cand[i][j][2])
+													oneMethodDel[a][b].push_back(this->cand[a][b][c]);
+											}
+								this->methodDel.push_back(oneMethodDel);
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+
+	for (int i = 0;i < row.size();i++)
+		this->method.push_back(row[i]);
+	for (int i = 0;i < col.size();i++)
+		this->method.push_back(col[i]);
+	for (int i = 0;i < sqrt.size();i++)
+		this->method.push_back(sqrt[i]);
 
 }
 

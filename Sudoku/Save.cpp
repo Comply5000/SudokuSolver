@@ -42,10 +42,16 @@ bool Save::saveFileDialog(wchar_t szFileName[])
 void Save::saveFile()
 {
     wchar_t savedFileName[MAX_PATH];
+
     if (saveFileDialog(savedFileName))
     {
-        std::fstream file;
-        file.open(savedFileName, std::ios::out);
+        std::wstring ws(savedFileName);
+        std::string str(ws.begin(), ws.end());
+        if (str.substr(str.length() - 4, str.length() - 1) != ".txt")
+            str += ".txt";
+
+        std::fstream file;        
+        file.open(str, std::ios::out);
 
         for (int i = 0;i < 9;i++)
         {

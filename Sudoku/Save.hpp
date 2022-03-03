@@ -4,6 +4,7 @@
 #include <fstream>
 #include <array>
 #include <iostream>
+#include <string>
 
 class Save
 {
