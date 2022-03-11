@@ -146,7 +146,7 @@ void Sudoku::initMethodButtons()
 	for (int i = 0;i < 3;i++)
 	{
 		this->methodList[i].setFont(this->font);
-		this->methodList[i].setPosition(sf::Vector2f(280.f, 720.f+i*35));
+		this->methodList[i].setPosition(sf::Vector2f(270.f, 720.f+i*35));
 		this->text.setCharacterSize(32);
 		this->text.setFillColor(sf::Color::White);
 	}
@@ -882,7 +882,45 @@ void Sudoku::updateMethod() //pobieranie wartoœci metod z klasy Solver i zapis d
 					}
 				}
 			}
-			std::string text = std::to_string(m + 1) + ". " + box[0] + ", " + box[1] + " and " + box[1] + "create triple in " + type;
+			std::string text = std::to_string(m + 1) + ". " + box[0] + ", " + box[1] + " and " + box[2] + " create triple in " + type;
+			this->listText.push_back(text);
+		}
+		this->updateMethodList();
+	}
+	else if (this->methodType == 6)
+	{
+		solver.xWing();
+		this->method = solver.returnMethod();
+		this->methodDel = solver.returnMethodDel();
+		this->structureType = solver.returnStructureType();
+
+		for (int m = 0; m < this->method.size(); m++)
+		{
+			int number;
+			std::string type;
+			if (this->structureType[m] == 0)
+				type = "Row";
+			else if (this->structureType[m] == 1)
+				type = "Column";
+			std::vector<std::string> box;
+			for (int i = 0; i < 9; i++)
+			{
+				for (int j = 0; j < 9; j++)
+				{
+					if (this->method[m][i][j].size() > 0)
+					{
+						number = method[m][i][j][0];
+						std::string t;
+						if (structureType[m] == 0)
+							t = std::to_string(i + 1);
+						else if(structureType[m] == 1)
+							t = std::to_string(j + 1);
+						box.push_back(t);
+						break;
+					}
+				}
+			}
+			std::string text = std::to_string(m + 1) + ". "+type+ " " + box[0] + " and " + box[1] + " create X-Wing with number " + std::to_string(number);
 			this->listText.push_back(text);
 		}
 		this->updateMethodList();

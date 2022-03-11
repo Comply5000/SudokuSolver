@@ -941,6 +941,8 @@ void Solver::hiddenPair()
 
 void Solver::xWing()
 {
+	this->findCandidate();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> row;
 	//wiersze
 	for (int i = 0;i < 9;i++)
 	{
@@ -966,26 +968,30 @@ void Solver::xWing()
 							//jeœli wystêpuje tylko 2 razy oraz na w tych samych kolumnach
 							if (n == 2 && this->contains(this->cand[b][columnCoord[0]], this->cand[i][j][k]) && this->contains(this->cand[b][columnCoord[1]], this->cand[i][j][k]))
 							{
-								//usuniêcie tych kandydatów z pozosta³ych 2 kolumn
-								for (int c = 0;c < 9;c++)
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+
+								for (int q = 0; q < 9; q++)
+									for (int w = 0; w < 9; w++)
+										if ((w == columnCoord[0] || w == columnCoord[1]) && this->contains(this->cand[q][w], this->cand[i][j][k]))
+											oneMethod[q][w].push_back(this->cand[i][j][k]);
+
+								bool existMethod = false;
+								for (int z = 0; z < row.size(); z++)
+									if (row[z] == oneMethod)
+										existMethod = true;
+
+								if (!existMethod)
 								{
-									for (int d = 0;d < this->cand[c][columnCoord[0]].size();d++)
-									{
-										if (c != b && c != i && this->cand[c][columnCoord[0]][d] == this->cand[i][j][k])
-										{
-											this->cand[c][columnCoord[0]].erase(this->cand[c][columnCoord[0]].begin() + d);
-										}
-									}
-								}
-								for (int c = 0;c < 9;c++)
-								{
-									for (int d = 0;d < this->cand[c][columnCoord[1]].size();d++)
-									{
-										if (c != b && c != i && this->cand[c][columnCoord[1]][d] == this->cand[i][j][k])
-										{
-											this->cand[c][columnCoord[1]].erase(this->cand[c][columnCoord[1]].begin() + d);
-										}
-									}
+									row.push_back(oneMethod);
+									this->structureType.push_back(0);
+									for(int q = 0;q<2;q++)
+										for (int c = 0; c < 9; c++)
+											for (int d = 0; d < this->cand[c][columnCoord[q]].size(); d++)
+												if (c != b && c != i && this->cand[c][columnCoord[q]][d] == this->cand[i][j][k])
+													oneMethodDel[c][columnCoord[q]].push_back(this->cand[i][j][k]);
+
+									this->methodDel.push_back(oneMethodDel);
 								}
 							}
 						}
@@ -995,8 +1001,9 @@ void Solver::xWing()
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>>	col;
 	//kolumny
-	for (int j = 0;j < 9;j++)
+	for (int j = 0; j < 9; j++)
 	{
 		for (int i = 0;i < 9;i++)
 		{
@@ -1018,26 +1025,31 @@ void Solver::xWing()
 									n++;
 							if (n == 2 && this->contains(this->cand[columnCoord[0]][b], this->cand[i][j][k]) && this->contains(this->cand[columnCoord[1]][b], this->cand[i][j][k]))
 							{
-								for (int c = 0;c < 9;c++)
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
+
+								for (int q = 0; q < 9; q++)
+									for (int w = 0; w < 9; w++)
+										if ((q == columnCoord[0] || q == columnCoord[1]) && this->contains(this->cand[q][w], this->cand[i][j][k]))
+											oneMethod[q][w].push_back(this->cand[i][j][k]);											
+
+								bool existMethod = false;
+								for (int z = 0; z < col.size(); z++)
+									if (col[z] == oneMethod)
+										existMethod = true;
+
+								if (!existMethod)
 								{
-									for (int d = 0;d < this->cand[columnCoord[0]][c].size();d++)
-									{
-										if (c != b && c != j && this->cand[columnCoord[0]][c][d] == this->cand[i][j][k])
-										{
-											this->cand[columnCoord[0]][c].erase(this->cand[columnCoord[0]][c].begin() + d);
-										}
-									}
-								}
-								for (int c = 0;c < 9;c++)
-								{
-									for (int d = 0;d < this->cand[columnCoord[1]][c].size();d++)
-									{
-										if (c != b && c != j && this->cand[columnCoord[1]][c][d] == this->cand[i][j][k])
-										{
-											this->cand[columnCoord[1]][c].erase(this->cand[columnCoord[1]][c].begin() + d);
-										}
-									}
-								}
+									col.push_back(oneMethod);
+									this->structureType.push_back(1);
+									for(int q = 0;q<2;q++)
+										for (int c = 0; c < 9; c++)
+											for (int d = 0; d < this->cand[columnCoord[q]][c].size(); d++)
+												if (c != b && c != j && this->cand[columnCoord[q]][c][d] == this->cand[i][j][k])
+													oneMethodDel[columnCoord[q]][c].push_back(this->cand[i][j][k]);
+									
+									this->methodDel.push_back(oneMethodDel);
+								}								
 							}
 						}
 					}
@@ -1045,6 +1057,11 @@ void Solver::xWing()
 			}
 		}
 	}
+
+	for (int i = 0; i < row.size(); i++)
+		this->method.push_back(row[i]);
+	for (int i = 0; i < col.size(); i++)
+		this->method.push_back(col[i]);
 }
 
 bool Solver::possible(int y, int x,int n)
