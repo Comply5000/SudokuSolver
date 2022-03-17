@@ -2,6 +2,7 @@
 
 int main()
 {
+    ::ShowWindow(GetConsoleWindow(), SW_HIDE);
     Sudoku sudoku;
     while (sudoku.running())
     {
@@ -10,9 +11,3 @@ int main()
     }
     return 0;
 }
-
-/*
-to do:
-- stworzyæ klasê wczytkuj¹c¹ sudoku z pliku graficznego
-- stworzyæ klasê generuj¹c¹ sudoku
-*/
