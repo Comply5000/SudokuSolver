@@ -887,6 +887,39 @@ void Sudoku::updateMethod() //pobieranie wartoœci metod z klasy Solver i zapis d
 		}
 		this->updateMethodList();
 	}
+	else if (this->methodType == 5)
+	{
+		solver.hiddenPair();
+		this->method = solver.returnMethod();
+		this->methodDel = solver.returnMethodDel();
+		this->structureType = solver.returnStructureType();
+
+		for (int m = 0; m < this->method.size(); m++)
+		{
+			std::string type;
+			if (this->structureType[m] == 0)
+				type = "row";
+			else if (this->structureType[m] == 1)
+				type = "column";
+			else if (this->structureType[m] == 2)
+				type = "square";
+			std::vector<std::string> box;
+			for (int i = 0; i < 9; i++)
+			{
+				for (int j = 0; j < 9; j++)
+				{
+					if (this->method[m][i][j].size() > 0)
+					{
+						std::string t = "R" + std::to_string(i + 1) + "C" + std::to_string(j + 1);
+						box.push_back(t);
+					}
+				}
+			}
+			std::string text = std::to_string(m + 1) + ". " + box[0] + " and " + box[1] + " create hidden pair in " + type;
+			this->listText.push_back(text);
+		}
+		this->updateMethodList();
+	}
 	else if (this->methodType == 6)
 	{
 		solver.xWing();

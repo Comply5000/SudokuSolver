@@ -796,6 +796,9 @@ void Solver::nakedTriple()
 
 void Solver::hiddenPair()
 {
+	this->findCandidate();
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> row;
+
 	for (int i = 0;i < 9;i++)
 	{
 		for (int a = 1;a <= 9;a++) //iteracja po wszystkich mo¿liwych kandydatach
@@ -825,15 +828,30 @@ void Solver::hiddenPair()
 
 						if (sameBoxes.size() == 2) //jêzeli wystêpuj¹ w tych samych polach - usuniêcie pozosta³ych kandydatów z tych 2 pól
 						{
-							if (this->cand[i][sameBoxes[0]].size() > 2)
-								for (int c = 0;c < this->cand[i][sameBoxes[0]].size();c++)
-									if (a != this->cand[i][sameBoxes[0]][c] && b != this->cand[i][sameBoxes[0]][c])
-										this->cand[i][sameBoxes[0]].erase(this->cand[i][sameBoxes[0]].begin() + c);
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 
-							if (this->cand[i][sameBoxes[1]].size() > 2)
-								for (int c = 0;c < this->cand[i][sameBoxes[1]].size();c++)
-									if (a != this->cand[i][sameBoxes[1]][c] && b != this->cand[i][sameBoxes[1]][c])
-										this->cand[i][sameBoxes[1]].erase(this->cand[i][sameBoxes[1]].begin() + c);
+							for (int q = 0; q < 2; q++)
+								if (this->cand[i][sameBoxes[q]].size() >= 2)
+									for (int c = 0; c < this->cand[i][sameBoxes[q]].size(); c++)
+									{
+										if (a != this->cand[i][sameBoxes[q]][c] && b != this->cand[i][sameBoxes[q]][c])
+											oneMethodDel[i][sameBoxes[q]].push_back(this->cand[i][sameBoxes[q]][c]);
+										else
+											oneMethod[i][sameBoxes[q]].push_back(this->cand[i][sameBoxes[q]][c]);
+									}
+
+							bool existMethod = false;
+							for (int z = 0; z < row.size(); z++)
+								if (row[z] == oneMethod)
+									existMethod = true;
+
+							if (!existMethod)
+							{
+								row.push_back(oneMethod);
+								this->structureType.push_back(0);
+								this->methodDel.push_back(oneMethodDel);
+							}		
 						}
 					}
 				}
@@ -841,7 +859,8 @@ void Solver::hiddenPair()
 		}
 	}
 
-	for (int j = 0;j < 9;j++)
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> col;
+	for (int j = 0; j < 9; j++)
 	{
 		for (int a = 1;a <= 9;a++)
 		{
@@ -869,15 +888,31 @@ void Solver::hiddenPair()
 
 						if (sameBoxes.size() == 2)
 						{
-							if (this->cand[sameBoxes[0]][j].size() > 2)
-								for (int c = 0;c < this->cand[sameBoxes[0]][j].size();c++)
-									if (a != this->cand[sameBoxes[0]][j][c] && b != this->cand[sameBoxes[0]][j][c])
-										this->cand[sameBoxes[0]][j].erase(this->cand[sameBoxes[0]][j].begin() + c);
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+							std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 
-							if (this->cand[sameBoxes[1]][j].size() > 2)
-								for (int c = 0;c < this->cand[sameBoxes[1]][j].size();c++)
-									if (a != this->cand[sameBoxes[1]][j][c] && b != this->cand[sameBoxes[1]][j][c])
-										this->cand[sameBoxes[1]][j].erase(this->cand[sameBoxes[1]][j].begin() + c);
+							bool notEmpty = true;
+							for (int q = 0; q < 2; q++)
+								if (this->cand[sameBoxes[q]][j].size() >= 2)
+									for (int c = 0; c < this->cand[sameBoxes[q]][j].size(); c++)
+									{
+										if (a != this->cand[sameBoxes[q]][j][c] && b != this->cand[sameBoxes[q]][j][c])
+											oneMethodDel[sameBoxes[q]][j].push_back(this->cand[sameBoxes[q]][j][c]);
+										else
+											oneMethod[sameBoxes[q]][j].push_back(this->cand[sameBoxes[q]][j][c]);
+									}
+										
+							bool existMethod = false;
+							for (int z = 0; z < col.size(); z++)
+								if (col[z] == oneMethod)
+									existMethod = true;
+
+							if (!existMethod)
+							{
+								col.push_back(oneMethod);
+								this->structureType.push_back(1);
+								this->methodDel.push_back(oneMethodDel);
+							}
 						}
 					}
 				}
@@ -885,6 +920,7 @@ void Solver::hiddenPair()
 		}
 	}
 
+	std::vector<std::array<std::array<std::vector<int>, 9>, 9>> sqrt;
 	for (int y = 0;y <= 6;y += 3)
 	{
 		for (int x = 0;x <= 6;x += 3)
@@ -921,15 +957,30 @@ void Solver::hiddenPair()
 
 							if (sameBoxesX.size() == 2)
 							{
-								if (this->cand[sameBoxesY[0]][sameBoxesX[0]].size() > 2)
-									for (int c = 0;c < this->cand[sameBoxesY[0]][sameBoxesX[0]].size();c++)
-										if (a != this->cand[sameBoxesY[0]][sameBoxesX[0]][c] && b != this->cand[sameBoxesY[0]][sameBoxesX[0]][c])
-											this->cand[sameBoxesY[0]][sameBoxesX[0]].erase(this->cand[sameBoxesY[0]][sameBoxesX[0]].begin() + c);
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethod;
+								std::array<std::array<std::vector<int>, 9>, 9 > oneMethodDel;
 
-								if (this->cand[sameBoxesY[1]][sameBoxesX[1]].size() > 2)
-									for (int c = 0;c < this->cand[sameBoxesY[1]][sameBoxesX[1]].size();c++)
-										if (a != this->cand[sameBoxesY[1]][sameBoxesX[1]][c] && b != this->cand[sameBoxesY[1]][sameBoxesX[1]][c])
-											this->cand[sameBoxesY[1]][sameBoxesX[1]].erase(this->cand[sameBoxesY[1]][sameBoxesX[1]].begin() + c);
+								for (int q = 0; q < 2; q++)
+									if (this->cand[sameBoxesY[q]][sameBoxesX[q]].size() >= 2)
+										for (int c = 0; c < this->cand[sameBoxesY[q]][sameBoxesX[q]].size(); c++)
+										{
+											if (a != this->cand[sameBoxesY[q]][sameBoxesX[q]][c] && b != this->cand[sameBoxesY[q]][sameBoxesX[q]][c])
+												oneMethodDel[sameBoxesY[q]][sameBoxesX[q]].push_back(this->cand[sameBoxesY[q]][sameBoxesX[q]][c]);
+											else
+												oneMethod[sameBoxesY[q]][sameBoxesX[q]].push_back(this->cand[sameBoxesY[q]][sameBoxesX[q]][c]);
+										}
+
+								bool existMethod = false;
+								for (int z = 0; z < sqrt.size(); z++)
+									if (sqrt[z] == oneMethod)
+										existMethod = true;
+
+								if (!existMethod)
+								{
+									sqrt.push_back(oneMethod);
+									this->structureType.push_back(2);
+									this->methodDel.push_back(oneMethodDel);
+								}
 							}
 						}
 					}
@@ -937,6 +988,13 @@ void Solver::hiddenPair()
 			}
 		}
 	}
+
+	for (int i = 0; i < row.size(); i++)
+		this->method.push_back(row[i]);
+	for (int i = 0; i < col.size(); i++)
+		this->method.push_back(col[i]);
+	for (int i = 0; i < sqrt.size(); i++)
+		this->method.push_back(sqrt[i]);
 }
 
 void Solver::xWing()
