@@ -1173,23 +1173,19 @@ std::array<std::array<int, 9>, 9> Solver::returnAllNumbers()
 
 std::array<std::array<int, 9>, 9> Solver::returnSingleNumber()
 {
+	std::array<std::array<int, 9>, 9> number = this->number;
 	this->solve();
-	try
+
+	for (int i = 0; i < 9; i++)
 	{
-		for (int i = 0;i < 9;i++)
+		for (int j = 0; j < 9; j++)
 		{
-			for (int j = 0;j < 9;j++)
+			if (this->tab[0][i][j] != number[i][j])
 			{
-				if (this->tab[0][i][j] != this->number[i][j])
-				{
-					this->number[i][j] = this->tab[0][i][j];
-					return this->number;
-				}
+				number[i][j] = this->tab[0][i][j];
+				return number;
 			}
 		}
-	}
-	catch (std::exception& e)
-	{
 	}
 }
 
